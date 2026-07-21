@@ -15,7 +15,11 @@ The Model Context Protocol (MCP) is the **first supported surface** — run
 Sentinel in place of your MCP server command, no client changes. The engine is
 transport-agnostic by design (A2A / agent-to-agent and direct tool APIs next).
 
-**🌐 Live site (with an in-browser injection tester):** <https://claude.ai/code/artifact/286e9fc5-02af-4d71-a000-72a5b1eb2335> · self-hostable from [`web/index.html`](web/index.html).
+**Materials:**
+🌐 [Live site](https://claude.ai/code/artifact/286e9fc5-02af-4d71-a000-72a5b1eb2335) (with an in-browser injection tester) ·
+📊 [Pitch deck](https://claude.ai/code/artifact/01e08b6b-a511-4f78-9c6e-c3560df487a4) ·
+📄 [Whitepaper](https://claude.ai/code/artifact/ddf13d71-281a-4acb-bd42-49eb2962587c) ([`WHITEPAPER.md`](WHITEPAPER.md)) ·
+self-host the site/deck from [`web/`](web/).
 
 ### See it stop a theft (60 seconds)
 
