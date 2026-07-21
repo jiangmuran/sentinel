@@ -10,6 +10,7 @@ Public API is intentionally small; see `Sentinel` for the entry point.
 
 from .actions import ActionClass, ActionClassifier
 from .audit import AuditLog
+from .commerce import Mandate, Receipt, TransactionGuard
 from .detector import (
     CallableDetector,
     CompositeDetector,
@@ -43,6 +44,9 @@ __all__ = [
     "Taint",
     "ActionClassifier",
     "ActionClass",
+    "Mandate",
+    "Receipt",
+    "TransactionGuard",
     "Policy",
     "PolicyEngine",
     "ToolRule",
