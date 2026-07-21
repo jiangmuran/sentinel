@@ -79,32 +79,40 @@ class StdioProxy:
     def _pump_client_to_server(
         self, client_in: TextIO, server_in: TextIO, client_out: TextIO
     ) -> None:
-        for line in client_in:
-            line = line.rstrip("\n")
-            if not line:
-                continue
-            msg = _try_json(line)
-            if msg is None:
-                server_in.write(line + "\n")
-                server_in.flush()
-                continue
-
-            method = msg.get("method")
-            if method == "tools/call":
-                decision, blocked_response = self._on_call(msg)
-                if blocked_response is not None:
-                    # Do not forward; answer the client directly.
-                    _write(client_out, blocked_response)
+        try:
+            for line in client_in:
+                line = line.rstrip("\n")
+                if not line:
                     continue
-            if "id" in msg and method:
-                tool = None
-                if method == "tools/call":
-                    tool = (msg.get("params") or {}).get("name")
-                with self._lock:
-                    self._pending[msg["id"]] = (method, tool)
+                msg = _try_json(line)
+                if msg is None:
+                    server_in.write(line + "\n")
+                    server_in.flush()
+                    continue
 
-            server_in.write(json.dumps(msg) + "\n")
-            server_in.flush()
+                method = msg.get("method")
+                if method == "tools/call":
+                    _, blocked_response = self._on_call(msg)
+                    if blocked_response is not None:
+                        # Do not forward; answer the client directly.
+                        _write(client_out, blocked_response)
+                        continue
+                if "id" in msg and method:
+                    tool = None
+                    if method == "tools/call":
+                        tool = (msg.get("params") or {}).get("name")
+                    with self._lock:
+                        self._pending[msg["id"]] = (method, tool)
+
+                server_in.write(json.dumps(msg) + "\n")
+                server_in.flush()
+        finally:
+            # Client hung up: propagate EOF so the wrapped server shuts down
+            # cleanly instead of blocking forever on its stdin.
+            try:
+                server_in.close()
+            except OSError:
+                pass
 
     # -- server -> client -----------------------------------------------------
     def _pump_server_to_client(self, server_out: TextIO, client_out: TextIO) -> None:

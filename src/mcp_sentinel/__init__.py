@@ -9,7 +9,12 @@ Public API is intentionally small; see `Sentinel` for the entry point.
 """
 
 from .audit import AuditLog
-from .detector import SignatureDetector, strip_obfuscation
+from .detector import (
+    CallableDetector,
+    CompositeDetector,
+    SignatureDetector,
+    strip_obfuscation,
+)
 from .policy import Policy, PolicyEngine, ToolRule
 from .sentinel import Sentinel, SentinelConfig
 from .types import (
@@ -29,6 +34,8 @@ __all__ = [
     "Sentinel",
     "SentinelConfig",
     "SignatureDetector",
+    "CompositeDetector",
+    "CallableDetector",
     "strip_obfuscation",
     "Policy",
     "PolicyEngine",

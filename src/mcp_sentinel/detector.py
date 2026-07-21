@@ -106,6 +106,34 @@ _RULES: tuple[_Rule, ...] = (
         r"\balways\s+call\b|\bdo\s+not\s+tell\s+the\s+user\b|"
         r"\bwithout\s+(informing|telling|asking)\s+the\s+user\b",
     ),
+    # --- Terminal / rendering hijack -----------------------------------------
+    _Rule(
+        "OBF004", Severity.MEDIUM, "ANSI/OSC terminal escape sequence",
+        r"\x1b[\[\]][0-9;?]*[A-Za-z]|\x1b\]8;",
+    ),
+    _Rule(
+        "EXF003", Severity.HIGH, "Markdown image/link exfiltration to a "
+        "parameterized remote URL",
+        r"!\[[^\]]{0,60}\]\(\s*https?://[^)\s]*\?[^)]*\)",
+    ),
+    # --- Chinese-language injection (this contest is China-hosted; most
+    #     detectors are English-only, leaving a real gap) --------------------
+    _Rule(
+        "CJK001", Severity.HIGH, "Instruction override (Chinese)",
+        r"(忽略|无视|忘记|不要理会)[^。\n]{0,12}?"
+        r"(之前|上述|以上|前面|所有|全部)?[^。\n]{0,8}?"
+        r"(指令|指示|提示|规则|命令|设定|要求)",
+    ),
+    _Rule(
+        "CJK002", Severity.HIGH, "Role reassignment (Chinese)",
+        r"你现在是|从现在(开始|起)你(是|将)|现在(开始)?你要扮演|进入开发者模式|"
+        r"扮演[^。\n]{0,6}(管理员|不受限|越狱)",
+    ),
+    _Rule(
+        "CJK003", Severity.HIGH, "Secret exfiltration directive (Chinese)",
+        r"(读取|获取|打开|发送|上传|外泄|泄露|传送)[^。\n]{0,20}?"
+        r"(密钥|私钥|凭证|凭据|口令|密码|机密|\.ssh|id_rsa|\.env|token)",
+    ),
 )
 
 
@@ -161,10 +189,66 @@ class SignatureDetector:
         return findings
 
 
+class CompositeDetector:
+    """Runs several detectors and merges their findings. Lets a fast signature
+    pass and a slower LLM pass live behind the one `Detector` interface."""
+
+    def __init__(self, *detectors: Detector):
+        self._detectors = detectors
+
+    def scan(self, text: str, source: Source) -> list[Finding]:
+        out: list[Finding] = []
+        for d in self._detectors:
+            out.extend(d.scan(text, source))
+        return out
+
+
+class CallableDetector:
+    """Adapt any ``fn(text, source_name) -> iterable[Finding | dict]`` into a
+    Detector. This is the escape hatch for an LLM classifier — Sentinel stays
+    free of any model-SDK dependency; you bring the callable.
+
+    Each returned item is a `Finding` or a dict with keys
+    ``{rule_id?, severity?, message?, span?}``. Return empty for clean text.
+
+    Example::
+
+        def llm_detect(text, source):
+            v = my_model.classify(text)          # your model call
+            return [{"severity": "HIGH", "message": v.reason}] if v.bad else []
+
+        detector = CompositeDetector(SignatureDetector(),
+                                     CallableDetector(llm_detect))
+    """
+
+    def __init__(self, fn, rule_prefix: str = "LLM"):
+        self._fn = fn
+        self._prefix = rule_prefix
+
+    def scan(self, text: str, source: Source) -> list[Finding]:
+        findings: list[Finding] = []
+        for i, item in enumerate(self._fn(text, source.value) or []):
+            if isinstance(item, Finding):
+                findings.append(item)
+            else:
+                findings.append(Finding(
+                    rule_id=item.get("rule_id", f"{self._prefix}{i:03d}"),
+                    severity=Severity.parse(item.get("severity", "HIGH")),
+                    source=source,
+                    message=item.get("message", "LLM-flagged injection"),
+                    span=item.get("span", ""),
+                ))
+        return findings
+
+
+_ANSI = re.compile(r"\x1b[\[\]][0-9;?]*[A-Za-z]|\x1b\]8;[^\x07\x1b]*(?:\x07|\x1b\\)?")
+
+
 def strip_obfuscation(text: str) -> str:
-    """Remove invisible smuggling characters. Used by SANITIZE."""
+    """Remove invisible/rendering smuggling characters. Used by SANITIZE."""
     text = _TAG_BLOCK.sub("", text)
     text = _BIDI_OVERRIDE.sub("", text)
+    text = _ANSI.sub("", text)
     for ch in _ZERO_WIDTH:
         text = text.replace(ch, "")
     return text
