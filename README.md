@@ -109,14 +109,28 @@ together (a block-everything layer scores 100% detection *and* 100% FPR).
 ```
 $ python -m benchmark.runner
 SentinelBench v0
-  corpus: 29 cases (18 malicious / 11 benign), 15 categories
-  detection rate      : 100.0%  (18/18 attacks blocked)
-  false-positive rate :   0.0%  (0/11 benign blocked)
-  overall accuracy    : 100.0%
+  corpus: 71 cases (49 malicious / 22 benign), 21 categories
+
+  CORE detection      : 100.0%  (41/41 signature-tier attacks blocked)
+  HARD detection      :   0.0%  (0/8 semantic-tier — LLM tier's job)
+  false-positive rate :   0.0%  (0/22 benign blocked)
+  overall detection   :  83.7%
 ```
 
-`--json` emits a machine-readable report; the runner exits non-zero on any
-failure, so it doubles as a CI gate.
+The corpus has two **difficulty tiers**. *Core* is what a signature layer should
+catch (keyword/structural); *hard* is semantic, cross-lingual (e.g. German),
+roleplay, or base64-encoded — attacks with **no signature surface**. Signatures
+are *expected* to miss the hard tier; that number is what the pluggable LLM
+detector tier exists to close, and reporting it honestly is the point. The
+runner exits non-zero only on a real regression (a core-tier miss or a false
+positive), so it doubles as a CI gate. Cases are mapped to the
+**OWASP MCP Top 10 (2025)** (e.g. `MCP03` Tool Poisoning, `MCP01` injection).
+
+> **How this relates to AgentDojo / InjecAgent.** Those benchmarks measure
+> whether a *model* complies with injections end-to-end. SentinelBench measures
+> something complementary and cheaper to run: the precision **and** recall of a
+> *guard* at the payload layer — including the false-positive rate that
+> detection-only numbers hide.
 
 ## Proven against the real MCP SDK
 
@@ -187,6 +201,20 @@ python -m unittest discover -s tests -v   # full suite, stdlib only
 - [ ] MCP server reputation / supply-chain allow-listing
 - [ ] Grow SentinelBench toward the published agent-security literature; publish a leaderboard
 - [ ] Explore alignment with AAIF `AgentGateway`
+
+## References
+
+Public disclosures and research this project is grounded in:
+
+- Invariant Labs — **MCP Tool Poisoning Attacks** (2025-04-06): <https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks>
+- Invariant Labs — **GitHub MCP Exploited: accessing private repositories via MCP** (2025-05-26): <https://invariantlabs.ai/blog/mcp-github-vulnerability> · analysis by Simon Willison: <https://simonwillison.net/2025/May/26/github-mcp-exploited/>
+- **EchoLeak** — zero-click indirect prompt injection in Microsoft 365 Copilot, **CVE-2025-32711** (Aim Security, 2025-06): <https://nvd.nist.gov/vuln/detail/CVE-2025-32711>
+- **OWASP MCP Top 10 (2025)**, incl. *MCP03 — Tool Poisoning*: <https://owasp.org/www-project-mcp-top-10/>
+- **AgentDojo** — a dynamic environment to evaluate prompt-injection attacks & defenses for LLM agents (NeurIPS 2024): <https://agentdojo.spylab.ai/>
+- **InjecAgent** — benchmark for indirect prompt injection in tool-integrated agents: <https://arxiv.org/abs/2403.02691>
+
+*References were verified against the sources above; dates and CVE IDs are the
+authors' own figures. Please open an issue if any link rots or a detail drifts.*
 
 ## License
 

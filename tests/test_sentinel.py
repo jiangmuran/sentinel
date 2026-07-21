@@ -210,12 +210,20 @@ class TestAuditLog(unittest.TestCase):
 
 
 class TestBenchmark(unittest.TestCase):
-    def test_corpus_scores_well(self):
+    def test_core_tier_and_no_false_positives(self):
         from benchmark.runner import run
         r = run()
-        # Default config should catch every malicious case with no false pos.
-        self.assertEqual(r["detection_rate"], 1.0, msg=r["failures"])
-        self.assertEqual(r["false_positive_rate"], 0.0, msg=r["failures"])
+        # Signature tier must catch every core attack, with zero false positives.
+        self.assertEqual(r["core_detection_rate"], 1.0, msg=r["regressions"])
+        self.assertEqual(r["false_positive_rate"], 0.0, msg=r["regressions"])
+        self.assertEqual(r["regressions"], [], msg=r["regressions"])
+
+    def test_hard_tier_is_present(self):
+        # The benchmark must keep an adversarial tier that signatures can miss,
+        # otherwise it isn't measuring the real gap.
+        from benchmark.runner import run
+        r = run()
+        self.assertGreaterEqual(r["hard_total"], 5)
 
 
 class TestProxyEndToEnd(unittest.TestCase):

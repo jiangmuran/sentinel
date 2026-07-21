@@ -102,10 +102,21 @@ class Sentinel:
         findings = self.detector.scan(result.text, Source.TOOL_RESULT)
         decision = self._decide(findings, context="result")
         if decision.action is Action.SANITIZE:
-            decision = Decision(
-                Action.SANITIZE, decision.findings, decision.reason,
-                sanitized_text=strip_obfuscation(result.text),
+            cleaned = strip_obfuscation(result.text)
+            # An attacker may hide a real injection *behind* the obfuscation
+            # (e.g. zero-width-joined "ignore all instructions"). Re-scan the
+            # de-obfuscated text; if it now trips a blocking rule, block.
+            rescan = self._decide(
+                self.detector.scan(cleaned, Source.TOOL_RESULT),
+                context="result:deobfuscated",
             )
+            if rescan.action is Action.BLOCK:
+                decision = rescan
+            else:
+                decision = Decision(
+                    Action.SANITIZE, decision.findings, decision.reason,
+                    sanitized_text=cleaned,
+                )
         if self.audit:
             self.audit.record(
                 "scrutinize_result", decision,

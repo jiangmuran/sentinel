@@ -302,9 +302,9 @@
           <a class="btn ghost" href="#how">See how it works</a>
         </div>
         <div class="stat-row">
-          <div class="stat"><div class="n good">100%</div><div class="l">Attacks blocked</div></div>
+          <div class="stat"><div class="n good">100%</div><div class="l">Core attacks blocked</div></div>
           <div class="stat"><div class="n good">0%</div><div class="l">False positives</div></div>
-          <div class="stat"><div class="n">29</div><div class="l">Bench cases</div></div>
+          <div class="stat"><div class="n">71</div><div class="l">Bench cases</div></div>
           <div class="stat"><div class="n">EN·中文</div><div class="l">Injection rules</div></div>
         </div>
       </div>
@@ -408,7 +408,7 @@
           <div class="idx">scrutinize_result()</div>
           <div>
             <h3>After the server answers &mdash; before the agent ingests it</h3>
-            <p>Where most real injections land. Signature detection across 15+ categories, EN and 中文; a pluggable <span class="mono">Detector</span> protocol layers an LLM classifier behind the same interface.</p>
+            <p>Where most real injections land. Signature detection across 20+ categories, EN and 中文; a pluggable <span class="mono">Detector</span> protocol layers an LLM classifier behind the same interface.</p>
             <div class="verdicts"><span class="vv">injection scan</span><span class="vv">de-obfuscate</span><span class="vv">block / sanitize</span></div>
           </div>
         </div>
@@ -430,11 +430,13 @@
       <div class="bench" style="margin-top:32px">
         <div>
           <div class="bignums">
-            <div class="bignum"><div class="v good">100%</div><div class="l">detection rate<br>(18/18 attacks blocked)</div></div>
-            <div class="bignum"><div class="v threat">0%</div><div class="l">false-positive rate<br>(0/11 benign blocked)</div></div>
+            <div class="bignum"><div class="v good">100%</div><div class="l">core detection<br>(41/41 signature-tier)</div></div>
+            <div class="bignum"><div class="v good">0%</div><div class="l">false positives<br>(0/22 benign)</div></div>
           </div>
-          <p class="bench-note">29 cases · 15 categories · runs in &lt;0.02s with zero dependencies.
-            The runner exits non-zero on any regression, so it doubles as a CI gate.</p>
+          <p class="bench-note">71 cases · 21 categories · two difficulty tiers · mapped to the
+            OWASP MCP&nbsp;Top&nbsp;10. The <b>hard tier</b> (semantic, German, roleplay, base64) has no
+            signature surface &mdash; it&rsquo;s reported honestly at 0% to show exactly what the
+            pluggable LLM detector tier is for. Runs in &lt;0.02s, zero dependencies.</p>
         </div>
         <div class="bars" id="bars"></div>
       </div>
@@ -619,11 +621,14 @@
 
   // benchmark bars
   var CATS=[["tool poisoning",100],["indirect injection",100],["中文 injection",100],
-    ["exfiltration",100],["confused deputy",100],["ASCII smuggling",100],["benign controls",100]];
+    ["exfiltration",100],["confused deputy",100],["ASCII / ANSI smuggling",100],
+    ["benign (no false pos)",100],["semantic · hard tier",0]];
   var bars=document.getElementById("bars");
   CATS.forEach(function(c,i){
     var row=document.createElement("div"); row.className="bar-row";
-    var fill='<div class="track"><div class="fill" style="animation-delay:'+(i*70)+'ms"></div></div>';
+    var style="animation-delay:"+(i*70)+"ms;width:"+c[1]+"%";
+    if(c[1]<100) style+=";background:var(--threat)";
+    var fill='<div class="track"><div class="fill" style="'+style+'"></div></div>';
     row.innerHTML='<span class="cat">'+c[0]+'</span>'+fill+'<span class="pct">'+c[1]+'%</span>';
     bars.appendChild(row);
   });

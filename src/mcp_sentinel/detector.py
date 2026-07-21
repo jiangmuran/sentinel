@@ -61,7 +61,7 @@ _RULES: tuple[_Rule, ...] = (
     ),
     _Rule(
         "INJ003", Severity.HIGH, "Injected system/assistant turn",
-        r"(?:^|\n)\s*(?:#{0,3}\s*)?(system|assistant|developer)\s*[:：]",
+        r"(?:^|\n|[.!?]\s+)\s*(?:#{0,3}\s*)?(system|assistant|developer)\s*[:：]",
     ),
     _Rule(
         "INJ004", Severity.MEDIUM, "New-instruction preamble",
@@ -78,12 +78,16 @@ _RULES: tuple[_Rule, ...] = (
         r"aws_secret_access_key|private[_ ]?key|api[_ ]?key|bearer\s+token|"
         r"password\s*[:=])",
     ),
+    # Blocks on a directive to read a *secret* specifically. Deliberately does
+    # NOT fire on generic "read a file" / "return its contents" — those are
+    # everyday benign phrasing, and over-blocking them is how injection filters
+    # earn a reputation for breaking real workflows.
     _Rule(
-        "SEC002", Severity.HIGH, "Filesystem/secret read directive",
+        "SEC002", Severity.HIGH, "Secret-read directive",
         r"\b(read|cat|open|load|print|exfiltrate|dump|fetch|retrieve)\b"
         r"[^.\n]{0,60}?"
-        r"(?:\bfile|\bcontents?|~?/?\.ssh|\.env|\bsecret|\bcredential|\btoken\b|"
-        r"\bapi[_ ]?key|\bid_rsa\b|\bpassword|aws_secret\w*)",
+        r"(~?/?\.ssh|\.env\b|\.aws|\bsecret|\bcredential|\btoken\b|"
+        r"\bapi[_ ]?key|\bid_rsa\b|\bprivate[_ ]?key|\bpassword|aws_secret\w*)",
     ),
     # --- Exfiltration channels -----------------------------------------------
     # Channel indicators are kept strong (a real outbound sink) so honest API
@@ -91,7 +95,7 @@ _RULES: tuple[_Rule, ...] = (
     _Rule(
         "EXF001", Severity.CRITICAL, "Outbound exfiltration directive",
         r"\b(send|post|upload|exfiltrate|leak|forward|email|transmit)\b"
-        r"[^.\n]{0,50}?(https?://|ftp://|webhook|curl\s|wget\s|\battacker\b|"
+        r"[^\n]{0,45}?(https?://|ftp://|webhook|curl\s|wget\s|\battacker\b|"
         r"evil\.)",
     ),
     _Rule(
