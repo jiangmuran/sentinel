@@ -175,7 +175,11 @@ class StdioProxy:
             msg["result"] = _content_block(
                 f"[blocked by mcp-sentinel] {decision.reason}", is_error=True
             )
-        elif decision.action is Action.SANITIZE and decision.sanitized_text is not None:
+        elif (decision.action is Action.SANITIZE
+              and decision.sanitized_text is not None
+              and decision.sanitized_text != text):
+            # Only rewrite when de-obfuscation actually changed the text; a
+            # no-op rewrite would needlessly drop the server's structuredContent.
             msg["result"] = _content_block(decision.sanitized_text)
         return msg
 
