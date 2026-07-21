@@ -1,0 +1,22 @@
+{
+  "default_allow": true,
+  "tools": {
+    "get_weather": {
+      "allow": true,
+      "deny_arg_patterns": {
+        "city": ["ssh", "id_rsa", "BEGIN .*PRIVATE KEY", "\\.env"]
+      },
+      "max_calls_per_minute": 30
+    },
+    "fetch_url": {
+      "allow": true,
+      "deny_arg_patterns": {
+        "url": ["^file://", "^ftp://", "127\\.0\\.0\\.1", "169\\.254\\.", "localhost"]
+      },
+      "max_calls_per_minute": 20
+    },
+    "run_shell": {
+      "allow": false
+    }
+  }
+}
