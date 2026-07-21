@@ -27,6 +27,9 @@ class ToolRule:
     # arg name -> list of regexes; a match on the stringified value denies.
     deny_arg_patterns: dict[str, list[str]] = field(default_factory=dict)
     max_calls_per_minute: int | None = None
+    # "high" | "low" | None — overrides the action classifier's heuristic so
+    # provenance gating can be forced on/off per tool.
+    stakes: str | None = None
 
     _compiled: dict[str, list[re.Pattern]] = field(default_factory=dict, repr=False)
 
@@ -50,6 +53,7 @@ class Policy:
                 allow=raw.get("allow", True),
                 deny_arg_patterns=raw.get("deny_arg_patterns", {}) or {},
                 max_calls_per_minute=raw.get("max_calls_per_minute"),
+                stakes=raw.get("stakes"),
             )
         return cls(default_allow=data.get("default_allow", True), tools=tools)
 

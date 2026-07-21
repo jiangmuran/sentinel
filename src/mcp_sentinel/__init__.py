@@ -8,6 +8,7 @@ Sits between an AI agent and the (untrusted) MCP servers it talks to, and:
 Public API is intentionally small; see `Sentinel` for the entry point.
 """
 
+from .actions import ActionClass, ActionClassifier
 from .audit import AuditLog
 from .detector import (
     CallableDetector,
@@ -15,6 +16,7 @@ from .detector import (
     SignatureDetector,
     strip_obfuscation,
 )
+from .provenance import ProvenanceTracker, Taint
 from .policy import Policy, PolicyEngine, ToolRule
 from .sentinel import Sentinel, SentinelConfig
 from .types import (
@@ -37,6 +39,10 @@ __all__ = [
     "CompositeDetector",
     "CallableDetector",
     "strip_obfuscation",
+    "ProvenanceTracker",
+    "Taint",
+    "ActionClassifier",
+    "ActionClass",
     "Policy",
     "PolicyEngine",
     "ToolRule",

@@ -16,9 +16,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from .actions import ActionClassifier
 from .audit import AuditLog
 from .detector import Detector, SignatureDetector, strip_obfuscation
 from .policy import Policy, PolicyEngine
+from .provenance import ProvenanceTracker
 from .types import (
     Action,
     Decision,
@@ -48,11 +50,19 @@ class Sentinel:
         detector: Detector | None = None,
         audit: AuditLog | None = None,
         config: SentinelConfig | None = None,
+        provenance: ProvenanceTracker | None = None,
+        actions: ActionClassifier | None = None,
     ):
+        policy = policy or Policy()
         self.config = config or SentinelConfig()
         self.detector = detector or SignatureDetector()
-        self.policy = PolicyEngine(policy or Policy())
+        self.policy = PolicyEngine(policy)
         self.audit = audit
+        self.provenance = provenance or ProvenanceTracker()
+        self.actions = actions or ActionClassifier(overrides={
+            name: rule.stakes for name, rule in policy.tools.items()
+            if rule.stakes
+        })
 
     # -- Discovery boundary ---------------------------------------------------
     def inspect_tools(self, tools: list[ToolDef]) -> tuple[list[ToolDef], list[Decision]]:
@@ -76,13 +86,38 @@ class Sentinel:
 
     # -- Request boundary -----------------------------------------------------
     def guard_call(self, call: ToolCall) -> Decision:
-        """Screen an outbound call: least privilege first, then argument
-        content. Policy denial short-circuits before content scanning."""
+        """Screen an outbound call: least privilege, then — for high-stakes
+        actions — provenance (does a parameter derive from untrusted content?),
+        then argument content."""
         policy_decision = self.policy.evaluate(call)
         if policy_decision.blocked:
             if self.audit:
                 self.audit.record("guard_call", policy_decision, call=call)
             return policy_decision
+
+        # Provenance gate — the core of the trust runtime. For an irreversible
+        # action, refuse if its parameters trace back to flagged untrusted
+        # content (the LLM Scope Violation that turns injection into damage).
+        action = self.actions.classify(call)
+        if action.high_stakes:
+            arg_values = [v for v in call.arguments.values() if isinstance(v, str)]
+            hits = self.provenance.trace(call.session_id, arg_values)
+            if hits:
+                taint, tok = hits[0]
+                decision = Decision(
+                    Action.BLOCK,
+                    reason=(f"provenance: {action.kind} action parameter derives "
+                            f"from untrusted content [{taint.taint_id}: "
+                            f"{taint.reason}] — matched {tok!r}"),
+                    policy_rule="provenance.taint",
+                )
+                if self.audit:
+                    self.audit.record("guard_call", decision, call=call, extra={
+                        "action_kind": action.kind,
+                        "taint": taint.to_dict(),
+                        "matched_token": tok,
+                    })
+                return decision
 
         findings: list[Finding] = []
         for arg, value in call.arguments.items():
@@ -117,6 +152,15 @@ class Sentinel:
                     Action.SANITIZE, decision.findings, decision.reason,
                     sanitized_text=cleaned,
                 )
+        # Taint the content's distinctive tokens for the session, so a later
+        # high-stakes action sourcing a parameter from it can be traced. We
+        # taint whenever the content was flagged (any severity) — clean content
+        # is trusted and can legitimately drive actions.
+        if decision.findings:
+            self.provenance.record(
+                result.session_id, result.text, Source.TOOL_RESULT,
+                list(decision.findings), reason=decision.reason,
+            )
         if self.audit:
             self.audit.record(
                 "scrutinize_result", decision,
