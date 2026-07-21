@@ -20,6 +20,11 @@ classifiers = [
 # Zero runtime dependencies — stdlib only, so it clones-and-runs anywhere.
 dependencies = []
 
+# The official MCP SDK is only needed to run the live integration tests; the
+# core library, demos, and benchmark have no third-party dependencies.
+[project.optional-dependencies]
+test = ["mcp>=1.2"]
+
 [project.urls]
 Homepage = "https://github.com/OWNER/mcp-sentinel"
 Issues = "https://github.com/OWNER/mcp-sentinel/issues"

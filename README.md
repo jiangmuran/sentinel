@@ -19,7 +19,8 @@ transport-agnostic by design (A2A / agent-to-agent and direct tool APIs next).
 🌐 [Live site](https://claude.ai/code/artifact/286e9fc5-02af-4d71-a000-72a5b1eb2335) (with an in-browser injection tester) ·
 📊 [Pitch deck](https://claude.ai/code/artifact/01e08b6b-a511-4f78-9c6e-c3560df487a4) ·
 📄 [Whitepaper](https://claude.ai/code/artifact/ddf13d71-281a-4acb-bd42-49eb2962587c) ([`WHITEPAPER.md`](WHITEPAPER.md)) ·
-self-host the site/deck from [`web/`](web/).
+🇨🇳 [中文一页纸](https://claude.ai/code/artifact/e3640a5e-bd39-48ba-986e-1967349f8554) ([`web/onepager-zh.html`](web/onepager-zh.html)) ·
+self-host from [`web/`](web/).
 
 ### See it stop a theft (60 seconds)
 
