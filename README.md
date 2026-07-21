@@ -9,6 +9,8 @@ It sits between an AI agent and the (untrusted) MCP servers it connects to, and:
 
 No client changes required — run it in place of your MCP server command and the agent connects to the proxy exactly as before.
 
+**🌐 Live site (with an in-browser injection tester):** <https://claude.ai/code/artifact/286e9fc5-02af-4d71-a000-72a5b1eb2335> · self-hostable from [`web/index.html`](web/index.html).
+
 > **Status:** early alpha (v0.1). Core engine, stdio proxy, and the SentinelBench corpus are working and tested (29 unit tests + a live integration test against the official MCP SDK). Built for the GOAI open-source challenge; Apache-2.0 licensed, contributions welcome.
 
 ---
