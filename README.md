@@ -2,6 +2,10 @@
 
 *English · [中文](README.zh.md)*
 
+[![CI](https://github.com/jiangmuran/sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/jiangmuran/sentinel/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Live site](https://img.shields.io/badge/live-jiangmuran.github.io%2Fsentinel-E8B341.svg)](https://jiangmuran.github.io/sentinel/)
+
 **A real-time fraud-block for AI agents that spend money.** Visa, Mastercard and
 Google are building the *rails* for agents to pay (x402 / AP2 / MPP) and the
 *records* for disputes (Verifiable Intent). None of them **enforce, at runtime

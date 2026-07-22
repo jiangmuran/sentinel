@@ -2,6 +2,10 @@
 
 *[English](README.md) · 中文*
 
+[![CI](https://github.com/jiangmuran/sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/jiangmuran/sentinel/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![在线](https://img.shields.io/badge/%E5%9C%A8%E7%BA%BF-jiangmuran.github.io%2Fsentinel-E8B341.svg)](https://jiangmuran.github.io/sentinel/)
+
 **给会花钱的 AI 智能体的实时盗刷断路器。** Visa、万事达、谷歌正在修 agent 付钱的
 *轨道*(x402 / AP2 / MPP)和给纠纷用的*事后记录*(Verifiable Intent)。**但没人在
 运行时、结算前**校验一笔交易是否越权、是否被操纵。Sentinel 就是这块缺失的层——坐在
