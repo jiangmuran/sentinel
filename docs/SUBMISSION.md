@@ -7,7 +7,7 @@ Deadline for our track: **Aug 16, 2026** (具身未来 is Aug 20). Finals: Sept 
 
 | Required item | Our asset | Status |
 |---|---|---|
-| **可运行 Demo** (runnable demo) | `examples/payment_demo.py`, `examples/demo.py`, `python -m benchmark.runner`, real-SDK integration tests | ✅ runnable, zero-dep |
+| **可运行 Demo** (runnable demo) | `examples/commerce_demo.py` (mandate + provenance + signed receipt), `payment_demo.py`, `python -m benchmark.runner`, real-SDK integration tests | ✅ runnable, zero-dep |
 | **代码仓库** (code repository) | this repo (Apache-2.0) | ⚠️ **needs a public GitHub repo** (blocker — needs you) |
 | **技术方案** (technical proposal) | `WHITEPAPER.md` + pitch deck (`web/pitch.html`) | ✅ |
 
@@ -17,13 +17,13 @@ Official dimensions: *技术创新性 · 开源贡献度 · 真实场景/科研�
 
 | Dimension | Evidence |
 |---|---|
-| 技术创新性 | Provenance/taint gating at the **action layer** — a runtime for the LLM Scope Violation class, not another text filter |
+| 技术创新性 | **Runtime enforcement of a signed mandate + provenance** at the moment of payment — the layer the giants' rails (x402/AP2/Verifiable Intent) structurally lack |
 | 开源贡献度 | Apache-2.0, EN+中文, pluggable `Detector`, **SentinelBench** (open, OWASP-mapped, benign-controlled) |
 | 真实场景价值 | Stops the exact loss class behind EchoLeak (CVE-2025-32711) for agents that spend money today |
 | 方案完整性 | Whitepaper + deck + landing page + threat model + roadmap + honest limitations |
 | Demo 可运行性 | Clone-and-run, deterministic, **proven on the official MCP SDK**; benchmark as a CI gate |
-| 工程成熟度 | 40 tests, 0 runtime deps, structured audit log, policy-as-config |
-| 团队长期潜力 | A citable benchmark + a category ("trust runtime for the agent economy") |
+| 工程成熟度 | 46 tests, 0 runtime deps, structured audit log, policy-as-config |
+| 团队长期潜力 | A citable benchmark + a new category: the runtime enforcement layer for agent payments (complementary to Visa/MC/Google rails) |
 
 ## Open-source compliance (required by the rules)
 
