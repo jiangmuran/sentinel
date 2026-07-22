@@ -1,5 +1,7 @@
 # Sentinel — the runtime enforcement layer for agent payments
 
+*English · [中文](README.zh.md)*
+
 **A real-time fraud-block for AI agents that spend money.** Visa, Mastercard and
 Google are building the *rails* for agents to pay (x402 / AP2 / MPP) and the
 *records* for disputes (Verifiable Intent). None of them **enforce, at runtime
