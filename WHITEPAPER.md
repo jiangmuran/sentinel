@@ -1,6 +1,7 @@
 # Sentinel: A Trust Runtime for AI Agents
 
-**A provenance-based defense against the LLM Scope Violation class of attacks.**
+**The runtime enforcement layer for agent payments — a provenance-based defense
+against the LLM Scope Violation class, applied at the moment money moves.**
 
 Version 0.1 · Apache-2.0 · Built for the GOAI open-source challenge
 
@@ -22,9 +23,18 @@ translation, encoding, and roleplay. Sentinel adds the missing layer. It is a
 **trust runtime**: a transport-agnostic guard in the data path that (1) detects
 injection, (2) enforces least privilege, and — the core contribution —
 (3) tracks **provenance** so that any high-stakes action whose parameters derive
-from untrusted content is refused at the action layer. Sentinel is deterministic,
-dependency-free, ships with an open benchmark (SentinelBench), and is proven
-end-to-end against the official Model Context Protocol (MCP) SDK.
+from untrusted content is refused at the action layer.
+
+Applied to the fastest-emerging high-stakes action — **payments** — this becomes
+a runtime enforcement layer. The payment industry is building the *rails*
+(Stripe MPP, Coinbase x402, Google AP2) and the *records* (Mastercard & Google
+*Verifiable Intent*, which logs intent for after-the-fact disputes). Neither
+**enforces, at runtime and before settlement**, that a transaction stays within
+its signed spending mandate and was not injection-induced. Sentinel does exactly
+that, via a signed **Mandate**, provenance, and a tamper-evident **Receipt** — a
+layer that is *complementary* to the rails, not competitive. Sentinel is
+deterministic, dependency-free, ships with an open benchmark (SentinelBench), and
+is proven end-to-end against the official Model Context Protocol (MCP) SDK.
 
 ---
 
@@ -194,6 +204,31 @@ agents lack the "are you sure?" confirmation and undo that humans get; the audit
 log is the accountability ledger that makes an agent's actions reviewable after
 the fact.
 
+### 4.5 The payment enforcement layer (Mandate, Receipt, TransactionGuard)
+
+Payments are the highest-stakes, fastest-emerging agent action, so Sentinel
+specializes the provenance gate into a payment enforcement layer.
+
+- **Mandate** — a spending authorization (agent id, amount cap, currency,
+  recipient allow-list, expiry, nonce) bound by an HMAC-SHA256 signature: the
+  runtime analogue of an AP2 / Verifiable-Intent mandate. Tampering with any
+  field invalidates the signature.
+- **TransactionGuard** — for each payment call, *before settlement*, it runs
+  three independent checks: (1) mandate scope (amount ≤ cap, recipient ∈
+  allow-list, not expired, signature valid), (2) provenance (does the amount or
+  recipient trace to flagged untrusted content?), and (3) emits a Receipt.
+- **Receipt** — a signed, tamper-evident approve/block record produced *before*
+  the money moves. It complements Verifiable Intent's dispute trail but is
+  generated at enforcement time; any post-hoc edit breaks its signature.
+
+The layer is rail-agnostic: it guards the *decision to transact*, whatever
+protocol (AP2 / x402 / MPP) ultimately settles it. In the reference demo, a
+shopping agent under a "≤¥50 to acct-MERCHANT-001" mandate reads a poisoned page
+redirecting payment to "acct-EVIL-6666" for ¥9999; the transaction is blocked on
+three independent grounds (over cap, off allow-list, provenance-tainted) with a
+signed blocked-receipt, while the legitimate ¥49 payment to the real merchant is
+approved. Precision — not "block all payments" — is the design goal.
+
 ---
 
 ## 5. SentinelBench
@@ -242,7 +277,7 @@ to a genuine FastMCP server *through* the Sentinel proxy:
   then issues a payment; the payment to the attacker's account is **blocked by the
   provenance gate over the real wire**, while a legitimate payment is allowed.
 
-The whole system is clone-and-run with **zero runtime dependencies**; 40 tests
+The whole system is clone-and-run with **zero runtime dependencies**; 46 tests
 pass.
 
 ---
@@ -284,6 +319,11 @@ hard tier and benign controls.
 - Academic defenses (multi-stage MCP guards, etc.) largely operate at the
   content/classification layer; Sentinel's distinguishing contribution is
   **provenance gating at the action layer**.
+- **Agent payment rails & records** — Stripe MPP, Coinbase x402, Google AP2, and
+  Mastercard/Google *Verifiable Intent* build the settlement rails and the
+  after-the-fact dispute record. Sentinel is the *complementary
+  runtime-enforcement* layer they lack: it consumes their mandates and blocks
+  out-of-scope or injection-induced transactions **before** settlement.
 
 ---
 
