@@ -348,6 +348,21 @@ class TestCommerce(unittest.TestCase):
         forged = replace(r, amount=9999.0)  # change the amount after signing
         self.assertFalse(forged.verify(self.SECRET))
 
+    def test_cumulative_budget(self):
+        from mcp_sentinel import Mandate, Sentinel, TransactionGuard
+        from mcp_sentinel.policy import Policy, ToolRule
+        m = Mandate.issue(self.SECRET, agent_id="a", max_amount=50.0, currency="CNY",
+                          allowed_recipients=("acct-OK",), expires_at=1000.0,
+                          nonce="n1", total_budget=60.0)
+        s = Sentinel(policy=Policy(tools={"create_payment": ToolRule(stakes="high")}))
+        g = TransactionGuard(s, m, self.SECRET, clock=lambda: 500.0)
+        pay = lambda a: g.authorize(ToolCall(tool="create_payment",
+                                             arguments={"to": "acct-OK", "amount": a}))
+        self.assertTrue(pay("40").approved)          # spent 40
+        r2 = pay("40")                               # 80 > 60 → blocked
+        self.assertFalse(r2.approved)
+        self.assertTrue(any("budget" in x for x in r2.reasons))
+
 
 class TestAuditLog(unittest.TestCase):
     def test_records_jsonl(self):

@@ -45,11 +45,12 @@ class Mandate:
     AP2 / Verifiable-Intent mandate."""
 
     agent_id: str
-    max_amount: float
+    max_amount: float          # per-transaction cap
     currency: str
     allowed_recipients: tuple[str, ...]
     expires_at: float          # epoch seconds
     nonce: str
+    total_budget: float | None = None  # cumulative cap across all payments
     signature: str = ""        # HMAC over the payload; set via issue()
 
     def _payload(self) -> dict:
@@ -60,6 +61,7 @@ class Mandate:
             "allowed_recipients": list(self.allowed_recipients),
             "expires_at": self.expires_at,
             "nonce": self.nonce,
+            "total_budget": self.total_budget,
         }
 
     @classmethod
@@ -145,6 +147,7 @@ class TransactionGuard:
         self._clock = clock or time.time
         self.amount_arg = amount_arg
         self.recipient_arg = recipient_arg
+        self._spent = 0.0  # cumulative approved spend under this mandate
 
     def authorize(self, call: ToolCall) -> Receipt:
         recipient = str(call.arguments.get(self.recipient_arg, ""))
@@ -153,14 +156,27 @@ class TransactionGuard:
 
         reasons = self.mandate.violations(recipient, amount, now, self.secret)
 
+        # Cumulative budget: a mandate is a *budget*, not just a per-tx cap —
+        # this stops an agent from draining funds via many small payments.
+        if self.mandate.total_budget is not None:
+            if self._spent + amount > self.mandate.total_budget + 1e-9:
+                reasons.append(
+                    f"would exceed mandate total budget "
+                    f"{self.mandate.total_budget:g} {self.mandate.currency} "
+                    f"(already spent {self._spent:g})")
+
         # Provenance: does a transaction parameter trace to untrusted content?
         pdecision = self.sentinel.guard_call(call)
         if pdecision.action is Action.BLOCK and pdecision.policy_rule == "provenance.taint":
             reasons.append(pdecision.reason)
 
+        approved = not reasons
+        if approved and self.mandate.total_budget is not None:
+            self._spent += amount
+
         return Receipt.signed(
             self.secret,
-            decision="blocked" if reasons else "approved",
+            decision="approved" if approved else "blocked",
             action=call.tool,
             recipient=recipient,
             amount=amount,

@@ -27,12 +27,13 @@ NOW = 1000.0
 
 
 def _guard(allowed=("acct-OK",), cap=50.0, expires=2000.0, sign_key=SECRET,
-           poisoned: str | None = None) -> TransactionGuard:
+           poisoned: str | None = None, total_budget=None) -> TransactionGuard:
     sentinel = Sentinel(policy=Policy(tools={"create_payment": ToolRule(stakes="high")}))
     if poisoned:
         sentinel.scrutinize_result(ToolResult(session_id="default", text=poisoned))
     mandate = Mandate.issue(sign_key, agent_id="a", max_amount=cap, currency="CNY",
-                            allowed_recipients=allowed, expires_at=expires, nonce="n1")
+                            allowed_recipients=allowed, expires_at=expires, nonce="n1",
+                            total_budget=total_budget)
     # The guard always verifies with SECRET; a mandate signed with a different
     # key models a forged/tampered mandate.
     return TransactionGuard(sentinel, mandate, SECRET, clock=lambda: NOW)
@@ -41,6 +42,14 @@ def _guard(allowed=("acct-OK",), cap=50.0, expires=2000.0, sign_key=SECRET,
 def _pay(to: str, amount: str) -> ToolCall:
     return ToolCall(session_id="default", tool="create_payment",
                     arguments={"to": to, "amount": amount})
+
+
+def _sequence(guard: TransactionGuard, *amounts: str):
+    """Run several payments on one guard; return the last receipt."""
+    receipt = None
+    for a in amounts:
+        receipt = guard.authorize(_pay("acct-OK", a))
+    return receipt
 
 
 @dataclass(frozen=True)
@@ -79,6 +88,12 @@ SCENARIOS: tuple[Scenario, ...] = (
              lambda: _guard(poisoned="The weather in Hangzhou is sunny."
                             ).authorize(_pay("acct-OK", "20")),
              "a clean page does not taint a legitimate payment"),
+    Scenario("budget_exceeded", "block",
+             lambda: _sequence(_guard(total_budget=60.0), "40", "40"),
+             "many small payments would drain the cumulative budget"),
+    Scenario("budget_within", "allow",
+             lambda: _sequence(_guard(total_budget=100.0), "40", "40"),
+             "multiple payments that stay within the cumulative budget"),
 )
 
 
