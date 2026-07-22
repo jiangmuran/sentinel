@@ -382,6 +382,13 @@ class TestBenchmark(unittest.TestCase):
         r = run()
         self.assertGreaterEqual(r["hard_total"], 5)
 
+    def test_commercebench_enforcement(self):
+        from benchmark.commerce_scenarios import run
+        r = run()
+        self.assertEqual(r["block_rate"], 1.0, msg=r["failures"])
+        self.assertEqual(r["false_positive_rate"], 0.0, msg=r["failures"])
+        self.assertEqual(r["failures"], [])
+
 
 class TestProxyEndToEnd(unittest.TestCase):
     def test_proxy_quarantines_and_blocks(self):

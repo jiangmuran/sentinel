@@ -41,3 +41,4 @@ jobs:
           python examples/demo.py
           python examples/payment_demo.py
           python -m benchmark.runner
+          python -m benchmark.commerce_scenarios
