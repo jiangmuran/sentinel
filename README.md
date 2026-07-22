@@ -187,6 +187,19 @@ positive), so it doubles as a CI gate. Cases are mapped to the
 > *guard* at the payload layer — including the false-positive rate that
 > detection-only numbers hide.
 
+### CommerceBench — the enforcement layer
+
+SentinelBench scores the *detector*; **CommerceBench** scores the *product*. It
+runs `TransactionGuard` across 8 payment scenarios — over-cap, off-allow-list,
+provenance-redirect, expired, forged-mandate, and 3 legitimate payments — with
+the same honest precision/recall. `python -m benchmark.commerce_scenarios`:
+
+```
+CommerceBench v0 — payment enforcement layer
+  block rate          : 100.0%  (5/5 attacks blocked before settlement)
+  false-positive rate :   0.0%  (0/3 legitimate payments blocked)
+```
+
 ## Proven against the real MCP SDK
 
 Beyond the hand-rolled tests, a live integration test drives a **genuine
