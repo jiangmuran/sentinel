@@ -15,10 +15,26 @@ long tail.
 
 from __future__ import annotations
 
+import base64
 import re
 from typing import Protocol
 
 from .types import Finding, Severity, Source
+
+# Base64-looking runs; decoded and re-scanned to catch encoded injections.
+_B64 = re.compile(r"[A-Za-z0-9+/]{16,}={0,2}")
+
+
+def _try_b64(token: str) -> str | None:
+    try:
+        raw = base64.b64decode(token + "=" * (-len(token) % 4), validate=False)
+    except (ValueError, Exception):  # noqa: BLE001 - any decode failure = skip
+        return None
+    s = raw.decode("utf-8", "ignore")
+    if not s:
+        return None
+    printable = sum(c.isprintable() or c in "\n\t " for c in s)
+    return s if printable / len(s) > 0.8 else None
 
 
 class Detector(Protocol):
@@ -183,14 +199,29 @@ class SignatureDetector:
                 "Bidirectional override characters", "",
             ))
 
+        findings.extend(self._rule_scan(text, source))
+
+        # Base64-encoded injection: decode base64-looking tokens and re-scan.
+        # Only flags if the *decoded* text trips a rule, so ordinary base64
+        # payloads (tokens, images) don't false-positive.
+        for m in _B64.finditer(text):
+            decoded = _try_b64(m.group(0))
+            if decoded and self._rule_scan(decoded, source):
+                findings.append(Finding(
+                    "OBF005", Severity.HIGH, source,
+                    "Base64-encoded injection", _truncate(decoded),
+                ))
+                break
+        return findings
+
+    def _rule_scan(self, text: str, source: Source) -> list[Finding]:
+        out: list[Finding] = []
         for rule in self._rules:
             m = rule.pattern.search(text)
             if m:
-                findings.append(Finding(
-                    rule.rule_id, rule.severity, source,
-                    rule.message, _truncate(m.group(0)),
-                ))
-        return findings
+                out.append(Finding(rule.rule_id, rule.severity, source,
+                                   rule.message, _truncate(m.group(0))))
+        return out
 
 
 class CompositeDetector:
