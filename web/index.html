@@ -294,11 +294,12 @@
   <section class="hero">
     <div class="wrap hero-grid">
       <div>
-        <span class="eyebrow">Trust runtime for AI agents · Apache-2.0</span>
-        <h1>When your agent spends money, one poisoned page shouldn&rsquo;t drain the wallet.</h1>
-        <p class="lede">Sentinel stops a prompt injection from becoming a real action &mdash; a payment,
-          a data leak, a deleted file. It traces <b>provenance</b> and refuses any high-stakes
-          action whose parameters came from untrusted content. MCP is the first supported surface.</p>
+        <span class="eyebrow">Runtime enforcement for agent payments · Apache-2.0</span>
+        <h1>A real-time fraud-block for AI agents that spend money.</h1>
+        <p class="lede">Visa, Mastercard and Google are building the rails for agents to pay. Sentinel is
+          the circuit breaker that stops the wrong payment <b>before the money moves</b> &mdash; enforcing
+          a signed spending <b>mandate</b> and blocking any transaction whose parameters trace to injected
+          content. Rail-agnostic; MCP is the first supported surface.</p>
         <div class="cta">
           <a class="btn primary" href="#start">▸ Run the demo</a>
           <a class="btn ghost" href="#how">See how it works</a>
@@ -344,10 +345,13 @@
     <div class="wrap">
       <div class="sec-head">
         <span class="eyebrow">The core idea</span>
-        <h2>Signature filters ask if text looks bad. A trust runtime asks a better question.</h2>
-        <p>&ldquo;<b>Did this irreversible action originate from untrusted content?</b>&rdquo; Sentinel
-          tracks it as data flow &mdash; flag untrusted content, taint it, and break the circuit the
-          moment a payment, send, or exec sources a parameter from it.</p>
+        <h2>The giants built the rails. Nobody built the runtime enforcement.</h2>
+        <p>Payment protocols (x402 / AP2 / MPP) handle <em>how</em> an agent pays; Mastercard &amp; Google&rsquo;s
+          Verifiable Intent <em>records</em> intent for after-the-fact disputes. The gap: at the moment of the
+          transaction, <b>enforce that it stays within its signed mandate AND wasn&rsquo;t injection-induced &mdash;
+          before settlement.</b> Sentinel runs three checks on every high-stakes action: signed <b>mandate</b>
+          (cap / allow-list / expiry), <b>provenance</b> (does a parameter trace to untrusted content?), and a
+          tamper-evident signed <b>receipt</b>.</p>
       </div>
       <div class="grid g3" style="margin-top:34px">
         <div class="card">
@@ -369,9 +373,10 @@
             came from a clean page. <b style="color:var(--safe)">Goes through.</b> Not &ldquo;block all payments.&rdquo;</p>
         </div>
       </div>
-      <p class="bench-note" style="margin-top:18px">This is the <b>LLM Scope Violation</b> behind EchoLeak
-        (CVE-2025-32711) &mdash; untrusted content driving a privileged action &mdash; caught by a
-        deterministic runtime, no model call required. &nbsp;<span class="mono">python examples/payment_demo.py</span></p>
+      <p class="bench-note" style="margin-top:18px"><b>Complementary, not competitive:</b> Verifiable Intent records
+        intent <em>after</em> the fact for disputes; Sentinel <em>enforces</em> it at runtime, <em>before</em>
+        settlement. Blocked on three independent grounds (over cap, off allow-list, provenance-tainted), with a
+        signed receipt. &nbsp;<span class="mono">python examples/commerce_demo.py</span></p>
     </div>
   </section>
 
