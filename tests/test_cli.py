@@ -57,6 +57,15 @@ class TestCLI(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertEqual(out["decision"], "blocked")
 
+    def test_batch_runs_all_claims(self):
+        code, out = _run(["batch", str(ROOT / "examples" / "claims_batch.jsonl"),
+                          "--config", str(ROOT / "configs" / "guardteam.json")])
+        self.assertEqual(out["total"], 4)
+        self.assertTrue(out["integrity"])
+        self.assertEqual(out["tally"]["blocked"], 1)
+        self.assertEqual(out["tally"]["held"], 1)
+        self.assertEqual(code, 1)  # blocked/held present → attention needed
+
     def test_bench_scorecard_no_regressions(self):
         code, out = _run(["bench", "--json"])
         self.assertEqual(code, 0)  # core clean + CommerceBench all enforced

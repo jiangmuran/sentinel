@@ -63,6 +63,7 @@ python -m guardteam case examples/case_fraud.json               # → blocked, h
 python -m guardteam authorize --to acct-CLAIMANT-88 --amount 1200 | \
   python -m guardteam verify -   # signed receipt, verified
 python -m guardteam case claim.json --ledger audit.jsonl   # append to the audit trail
+python -m guardteam batch claims.jsonl --report out.html    # many claims → ledger + report
 python -m guardteam audit audit.jsonl                       # verify it wasn't tampered
 python -m guardteam bench        # SentinelBench + CommerceBench scorecard
 python -m guardteam serve-mcp    # the four Skills, over the MCP protocol

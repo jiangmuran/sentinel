@@ -137,6 +137,37 @@ def cmd_bench(args) -> int:
     return 0 if ok else 1
 
 
+def cmd_batch(args) -> int:
+    from .ledger import AuditLedger
+    if args.config:
+        team = GuardTeam.from_config(args.config)
+    else:
+        team = GuardTeam(_default_mandate(DEFAULT_SECRET), DEFAULT_SECRET)
+    ledger = AuditLedger(secret=team.secret)
+    tally = {"approved": 0, "blocked": 0, "held": 0}
+    rows = []
+    for i, line in enumerate(Path(args.file).read_text(encoding="utf-8").splitlines()):
+        line = line.strip()
+        if not line:
+            continue
+        case = json.loads(line)
+        final, _ = team.handle_case(case.get("case_id", f"case-{i}"),
+                                    case["signals"], case["proposed_payout"], ledger=ledger)
+        tally[final["decision"]] = tally.get(final["decision"], 0) + 1
+        rows.append({"case_id": case.get("case_id", f"case-{i}"),
+                     "decision": final["decision"], "amount": final.get("amount"),
+                     "recipient": final.get("recipient")})
+    if args.ledger:
+        ledger.save(args.ledger)
+    if args.report:
+        from .report import render_html
+        Path(args.report).write_text(render_html(ledger), encoding="utf-8")
+    _emit({"total": len(rows), "tally": tally, "cases": rows,
+           "ledger_head": ledger.head, "integrity": ledger.verify()["ok"]})
+    # Non-zero exit if anything was blocked or held (needs attention).
+    return 0 if tally.get("blocked", 0) == 0 and tally.get("held", 0) == 0 else 1
+
+
 def cmd_audit(args) -> int:
     from .ledger import AuditLedger
     result = AuditLedger.load(args.file, args.secret).verify()
@@ -197,6 +228,13 @@ def build_parser() -> argparse.ArgumentParser:
     b = sub.add_parser("bench", help="run SentinelBench + CommerceBench scorecard")
     b.add_argument("--json", action="store_true")
     b.set_defaults(func=cmd_bench)
+
+    ba = sub.add_parser("batch", help="run many claims (JSONL) through the team")
+    ba.add_argument("file", help="JSONL, one {case_id, signals, proposed_payout} per line")
+    ba.add_argument("--config", help="team config JSON (mandate + screener)")
+    ba.add_argument("--ledger", help="write the tamper-evident audit ledger here")
+    ba.add_argument("--report", help="write an HTML compliance report here")
+    ba.set_defaults(func=cmd_batch)
 
     au = sub.add_parser("audit", help="verify a tamper-evident audit ledger")
     au.add_argument("file")
