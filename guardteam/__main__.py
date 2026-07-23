@@ -90,7 +90,8 @@ def cmd_authorize(args) -> int:
 
 
 def cmd_verify(args) -> int:
-    d = json.loads(Path(args.file).read_text(encoding="utf-8"))
+    raw = sys.stdin.read() if args.file == "-" else Path(args.file).read_text(encoding="utf-8")
+    d = json.loads(raw)
     r = Receipt(decision=d["decision"], action=d["action"], recipient=d["recipient"],
                 amount=float(d["amount"]), currency=d["currency"],
                 reasons=tuple(d.get("reasons", [])), mandate_nonce=d["mandate_nonce"],
@@ -152,7 +153,7 @@ def build_parser() -> argparse.ArgumentParser:
     a.add_argument("--secret", default=DEFAULT_SECRET)
     a.set_defaults(func=cmd_authorize)
 
-    v = sub.add_parser("verify", help="verify a receipt's signature")
+    v = sub.add_parser("verify", help="verify a receipt's signature ('-' = stdin)")
     v.add_argument("file")
     v.add_argument("--secret", default=DEFAULT_SECRET)
     v.set_defaults(func=cmd_verify)
