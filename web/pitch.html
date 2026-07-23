@@ -81,6 +81,18 @@
   .hint{position:fixed;top:16px;right:clamp(18px,4vw,40px);font-family:var(--mono);font-size:11px;color:var(--faint);z-index:20;letter-spacing:.05em}
   .progress{position:fixed;top:0;left:0;height:3px;background:var(--brand);z-index:30;transition:width .35s ease}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  /* Print → Save as PDF: stack every slide, one per page, on a light ground. */
+  @media print{
+    :root{--ground:#fff;--surface:#fff;--surface-2:#f2f5f9;--ink:#1a2230;
+      --strong:#0A0F18;--muted:#3d4759;--faint:#6a7688;--line:#d7dee8;--line-2:#c2cddb;
+      --brand:#9a6606;--brand-2:#7a5205;--threat:#c22a2f;--safe:#0c7d55;--warn:#9a6606}
+    html,body{height:auto;overflow:visible;background:#fff}
+    .deck{height:auto}
+    .slide{display:flex!important;position:relative;inset:auto;min-height:100vh;
+      page-break-after:always;break-after:page;animation:none;padding:40px 54px}
+    .term{background:#0D1526}
+    .chrome,.arrows,.hint,.progress{display:none!important}
+  }
 </style>
 </head>
 <body>
@@ -94,7 +106,7 @@
     <div class="eyebrow">GOAI · 新智基座 / Agent Infra · 方向 #4 金融风控与理赔自动化</div>
     <h1>Sentinel GuardTeam<br><span style="font-size:.5em;font-weight:700;color:var(--muted)">支付风控 · 多智能体自主闭环</span></h1>
     <p class="lede big" style="max-width:36ch">一个基于 <strong>AgentTeams</strong> 的多 Agent 风控闭环,由自研安全执行层 <strong>Sentinel</strong> 提供"安全 + 合规审计"骨干 Skill。</p>
-    <div class="proof">AgentTeams Manager-Workers · 4 个职能 Agent · 4 个 Sentinel Skills(MCP)· 开源 Apache-2.0 · 54 测试</div>
+    <div class="proof">AgentTeams Manager-Workers · 4 个职能 Agent · 4 个 Sentinel Skills(MCP)· 开源 Apache-2.0 · 80 测试</div>
     <div class="badges"><span class="badge hot">github.com/jiangmuran/sentinel</span><span class="badge">中英文</span><span class="badge">零依赖可跑</span></div>
   </div></section>
 
@@ -176,11 +188,25 @@
     <div class="eyebrow"><span class="n">07</span> 架构 · 站在 AgentTeams 上</div>
     <h2>复用 AgentTeams 的企业级底座,补上它缺的运行时安全。</h2>
     <ul class="clean">
-      <li><span class="m">◆</span><span><b>AgentTeams Manager-Workers</b> 编排 4 个 Worker,Matrix 房间人在回路</span></li>
-      <li><span class="m">◆</span><span><b>Sentinel Skills 经 MCP 接入</b>(AgentTeams 原生支持声明式 MCP)</span></li>
-      <li><span class="m">◆</span><span><b>Higress 网关凭证隔离</b> + MinIO 共享上下文,直接复用</span></li>
+      <li><span class="m">◆</span><span><b>角色编排 / 任务分解</b> → AgentTeams Manager-Workers 编排 4 个 Worker</span></li>
+      <li><span class="m">◆</span><span><b>上下文传递 / 状态追踪</b> → Matrix 房间(transcript)+ MinIO 共享黑板 + 共享污点会话</span></li>
+      <li><span class="m">◆</span><span><b>协同执行 / 工具集成</b> → 4 个 Sentinel Skill 经 MCP 接入每个 Worker(声明式)</span></li>
+      <li><span class="m">◆</span><span><b>凭证隔离</b> → Higress 网关持签名密钥,Worker 永不接触(已容器化)</span></li>
     </ul>
-    <div class="proof">现在:原生多 Agent 实现,零依赖可跑;复赛:部署为 AgentTeams 的 Worker + MCP Skill</div>
+    <div class="proof">现在:原生多 Agent 实现,零依赖可跑,Skills 已用真 MCP 客户端端到端验证;复赛:docker compose 起 Skills MCP 服务,部署为 AgentTeams Worker</div>
+  </div></section>
+
+  <!-- 8b COVERAGE -->
+  <section class="slide"><div class="inner">
+    <div class="eyebrow"><span class="n">07·</span> 官方要求 · 逐项齐全</div>
+    <h2>评委清单上的每一项,都能指到实现。</h2>
+    <div class="cols">
+      <div class="card good"><div class="t" style="color:var(--safe)">上下文传递</div><p>共享 Room(transcript+黑板)+ 跨 Agent 共享 provenance 污点会话</p></div>
+      <div class="card good"><div class="t" style="color:var(--safe)">结果校验</div><p>合规审计 Agent 结算前强制校验授权+来源;签名回执可复验</p></div>
+      <div class="card good"><div class="t" style="color:var(--safe)">异常处理</div><p>三态结论:通过 / 拦截 / 暂缓复核;非通过一律转人工(人在回路)</p></div>
+      <div class="card good"><div class="t" style="color:var(--safe)">安全边界 · 风控</div><p>签名授权额度/白名单/累计预算 + 污点熔断 + 黑名单/频次/异常金额筛查</p></div>
+    </div>
+    <div class="proof">CLI 一条链:scan → case/batch → 签名审计账本(哈希链防篡改)→ 出合规报告 → audit 验完整性</div>
   </div></section>
 
   <!-- 9 PROOF -->
@@ -189,11 +215,11 @@
     <h2>不是 PPT,是能跑、能验签的代码。</h2>
     <div class="stat-row">
       <div class="stat"><div class="v good">4</div><div class="l">职能 Agent</div></div>
-      <div class="stat"><div class="v good">54</div><div class="l">测试全绿</div></div>
+      <div class="stat"><div class="v good">80</div><div class="l">测试全绿</div></div>
       <div class="stat"><div class="v good">100%</div><div class="l">SentinelBench 核心</div></div>
       <div class="stat"><div class="v">0</div><div class="l">运行时依赖</div></div>
     </div>
-    <div class="proof">SentinelBench(71 用例, OWASP MCP Top 10)+ CommerceBench(10 场景)+ 真 MCP SDK 集成 · CI 常绿 · 在线站点 jiangmuran.github.io/sentinel</div>
+    <div class="proof">SentinelBench(97 用例, OWASP MCP Top 10)+ CommerceBench(10 场景)+ 真 MCP SDK 集成 · Skills MCP 服务(已容器化)· 9 子命令 CLI · 防篡改审计账本 + 合规报告 · CI 常绿 · jiangmuran.github.io/sentinel</div>
   </div></section>
 
   <!-- 10 CRITERIA -->
@@ -213,7 +239,7 @@
     <div class="eyebrow"><span class="n">10</span> 落地与开源计划</div>
     <h2>从初赛到生产,一条清晰的路。</h2>
     <div class="cols3">
-      <div class="card"><div class="t">初赛(8/16)</div><h3>提案 + PPT + 可跑代码</h3><p>GuardTeam 原生多 Agent 闭环已就绪、54 测试全绿</p></div>
+      <div class="card"><div class="t">初赛(8/16)</div><h3>提案 + PPT + 可跑代码</h3><p>GuardTeam 原生多 Agent 闭环已就绪、80 测试全绿</p></div>
       <div class="card"><div class="t">复赛</div><h3>部署到 AgentTeams</h3><p>4 Agent 跑成 Worker,Skill 走 MCP;接企业风控数据源</p></div>
       <div class="card"><div class="t">决赛(9/22)</div><h3>现场 Demo + 生产落地</h3><p>对接蚂蚁/阿里云支付风控场景</p></div>
     </div>
@@ -235,7 +261,7 @@
   <section class="slide"><div class="inner">
     <div class="eyebrow">Sentinel GuardTeam · 支付风控多智能体自主闭环</div>
     <h1 style="font-size:clamp(26px,4.6vw,54px)">在钱放出去之前,<br>把错误的那一笔拦下。</h1>
-    <p class="lede big wide">开源 · Apache-2.0 · 基于 AgentTeams · 54 测试全绿 · 现在就能跑。</p>
+    <p class="lede big wide">开源 · Apache-2.0 · 基于 AgentTeams · 80 测试全绿 · 现在就能跑。</p>
     <div class="badges"><span class="badge hot">python examples/guardteam_demo.py</span><span class="badge">jiangmuran.github.io/sentinel</span></div>
   </div></section>
 
