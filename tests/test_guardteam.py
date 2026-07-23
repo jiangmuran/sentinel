@@ -142,6 +142,19 @@ class TestHeldForReview(unittest.TestCase):
         self.assertTrue(any("风险名单" in r for r in final["reasons"]))
 
 
+class TestFromConfig(unittest.TestCase):
+    def test_from_config_builds_working_team(self):
+        from guardteam import GuardTeam
+        cfg = ROOT / "configs" / "guardteam.json"
+        team = GuardTeam.from_config(cfg)
+        # recipient is in the mandate allow-list but on the config blocklist → held
+        final, _ = team.handle_case(
+            "cfg",
+            signals=[{"source": "l", "text": "理赔 ¥2500,材料齐全。", "trusted": True}],
+            proposed_payout={"to": "acct-MERCHANT-001", "amount": 2500})
+        self.assertEqual(final["decision"], "held")
+
+
 class _FakeBlock:
     type = "text"
     text = '{"level":"high","reason":"suspicious recipient"}'

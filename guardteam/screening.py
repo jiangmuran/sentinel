@@ -34,6 +34,16 @@ class RiskScreener:
     _hist: dict[str, list[float]] = field(default_factory=dict, repr=False)
     _recent: dict[tuple, float] = field(default_factory=dict, repr=False)
 
+    @classmethod
+    def from_dict(cls, data: dict) -> "RiskScreener":
+        return cls(
+            blocklist=frozenset(data.get("blocklist", ())),
+            velocity_max=data.get("velocity_max", 5),
+            velocity_window=data.get("velocity_window", 3600.0),
+            duplicate_window=data.get("duplicate_window", 600.0),
+            amount_alert=data.get("amount_alert"),
+        )
+
     def _now(self) -> float:
         if self.clock:
             return self.clock()

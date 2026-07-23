@@ -235,6 +235,22 @@ class GuardTeam:
         self.brain = brain or NullBrain()
         self.screener = screener
 
+    @classmethod
+    def from_config(cls, path, brain: Brain | None = None) -> "GuardTeam":
+        """Build a team from one JSON config: {secret, mandate{…}, screener{…}}."""
+        import json
+        from pathlib import Path
+
+        from .screening import RiskScreener
+
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        secret = data.get("secret", "issuer-signing-key")
+        md = dict(data["mandate"])
+        md["allowed_recipients"] = tuple(md.get("allowed_recipients", ()))
+        mandate = Mandate.issue(secret, **md)
+        screener = RiskScreener.from_dict(data["screener"]) if data.get("screener") else None
+        return cls(mandate, secret, brain=brain, screener=screener)
+
     def _room(self, case_id: str) -> Room:
         sentinel = Sentinel(policy=Policy(tools={"create_payment": ToolRule(stakes="high")}))
         guard = TransactionGuard(sentinel, self.mandate, self.secret)

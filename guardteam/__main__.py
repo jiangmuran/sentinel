@@ -64,8 +64,11 @@ def cmd_scan(args) -> int:
 
 def cmd_case(args) -> int:
     data = json.loads(Path(args.file).read_text(encoding="utf-8"))
-    secret = data.get("secret", DEFAULT_SECRET)
-    team = GuardTeam(_mandate_from(data, secret), secret, screener=_screener_from(data))
+    if args.config:
+        team = GuardTeam.from_config(args.config)
+    else:
+        secret = data.get("secret", DEFAULT_SECRET)
+        team = GuardTeam(_mandate_from(data, secret), secret, screener=_screener_from(data))
     final, room = team.handle_case(
         data.get("case_id", "cli"), data["signals"], data["proposed_payout"])
     if args.transcript:
@@ -146,6 +149,8 @@ def build_parser() -> argparse.ArgumentParser:
     c = sub.add_parser("case", help="run a claim through the GuardTeam multi-agent loop")
     c.add_argument("file", help="JSON: {signals, proposed_payout, [mandate], [blocklist]}")
     c.add_argument("--transcript", action="store_true", help="include the agent transcript")
+    c.add_argument("--config", help="team config JSON (mandate + screener); "
+                                    "overrides any inline in the case file")
     c.set_defaults(func=cmd_case)
 
     a = sub.add_parser("authorize", help="enforce a payment against the mandate → receipt")
