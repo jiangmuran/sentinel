@@ -23,6 +23,7 @@ from typing import Any
 from mcp_sentinel import Mandate, Sentinel, TransactionGuard
 from mcp_sentinel.policy import Policy, ToolRule
 
+from .brain import Brain, NullBrain
 from .skills import EnforcementSkill, InjectionScanSkill, ProvenanceSkill
 
 
@@ -88,8 +89,9 @@ class SignalAggregator(Agent):
 class RiskLocator(Agent):
     name = "locator"
 
-    def __init__(self, prov: ProvenanceSkill):
+    def __init__(self, prov: ProvenanceSkill, brain: Brain | None = None):
         self.prov = prov
+        self.brain = brain or NullBrain()
 
     def handle(self, msg: Message, room: Room) -> list[Message]:
         payout = room.blackboard["proposed_payout"]
@@ -103,7 +105,16 @@ class RiskLocator(Agent):
             findings.append(f"收款方溯源到不可信信号 (污点 {m['taint_id']}, 命中 {m['token']!r})")
         if flagged:
             findings.append(f"{len(flagged)} 条信号被标记为可疑: {', '.join(flagged)}")
+        # Deterministic provenance is authoritative; the LLM brain may only
+        # *raise* risk and add narrative — it can never lower it.
         level = "high" if (tainted or flagged) else "low"
+        b = self.brain.decide("locator", {"payout": payout, "flagged": flagged,
+                                          "det_level": level})
+        if isinstance(b, dict):
+            if b.get("level") == "high":
+                level = "high"
+            if b.get("reason"):
+                findings.append(f"LLM: {b['reason']}")
         room.blackboard["risk"] = {"level": level, "findings": findings}
         return [Message(self.name, "planner", "risk.assessed",
                         {"level": level, "findings": findings})]
@@ -113,12 +124,19 @@ class RiskLocator(Agent):
 class DispositionPlanner(Agent):
     name = "planner"
 
+    def __init__(self, brain: Brain | None = None):
+        self.brain = brain or NullBrain()
+
     def handle(self, msg: Message, room: Room) -> list[Message]:
         payout = room.blackboard["proposed_payout"]
         level = msg.payload["level"]
-        # The planner proposes an action. Note: even if the planner is wrong or
-        # itself hijacked, the auditor's runtime enforcement is the backstop.
+        # The planner proposes an action. Note: even if the planner (or its LLM
+        # brain) is wrong or itself hijacked into proposing "pay", the auditor's
+        # runtime enforcement is the backstop — LLM proposes, Sentinel disposes.
         disposition = "review" if level == "high" else "pay"
+        b = self.brain.decide("planner", {"level": level, "payout": payout})
+        if isinstance(b, dict) and b.get("disposition") in ("pay", "review", "reject"):
+            disposition = b["disposition"]
         room.blackboard["disposition"] = disposition
         room.blackboard["action"] = {"to": payout["to"], "amount": payout["amount"]}
         return [Message(self.name, "auditor", "disposition.proposed",
@@ -181,11 +199,15 @@ class Manager:
 
 # ---- assembly -------------------------------------------------------------
 class GuardTeam:
-    """Builds the Manager + 4 Workers, wired to Sentinel Skills."""
+    """Builds the Manager + 4 Workers, wired to Sentinel Skills.
 
-    def __init__(self, mandate: Mandate, secret: str):
+    Pass `brain` (an LLM brain) to make the analysis agents autonomous; the
+    compliance auditor's enforcement stays deterministic regardless."""
+
+    def __init__(self, mandate: Mandate, secret: str, brain: Brain | None = None):
         self.mandate = mandate
         self.secret = secret
+        self.brain = brain or NullBrain()
 
     def _room(self, case_id: str) -> Room:
         sentinel = Sentinel(policy=Policy(tools={"create_payment": ToolRule(stakes="high")}))
@@ -200,8 +222,8 @@ class GuardTeam:
         enforce = EnforcementSkill(room.guard)
         manager = Manager([
             SignalAggregator(scan, prov),
-            RiskLocator(prov),
-            DispositionPlanner(),
+            RiskLocator(prov, self.brain),
+            DispositionPlanner(self.brain),
             ComplianceAuditor(enforce),
         ])
         init = Message("manager", "aggregator", "case.new",
