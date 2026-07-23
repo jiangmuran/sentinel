@@ -29,6 +29,29 @@ changes.
 🇨🇳 [中文一页纸](https://claude.ai/code/artifact/e3640a5e-bd39-48ba-986e-1967349f8554) ([`web/onepager-zh.html`](web/onepager-zh.html)) ·
 self-host from [`web/`](web/).
 
+---
+
+## 🤖 GuardTeam — the multi-agent system built on Sentinel (GOAI 新智基座)
+
+**Sentinel GuardTeam** is a *native multi-agent* financial risk-control closed loop —
+**信号聚合 → 风险定位 → 处置方案 → 合规审计** — on Alibaba's [AgentTeams](https://github.com/agentscope-ai/AgentTeams),
+where Sentinel's four capabilities are the mandatory **Skills**. Its principle is
+**LLM proposes, Sentinel disposes**: the analysis agents can be LLM-driven, but every
+payout is enforced *deterministically* — so even a hijacked agent can't push a
+fraudulent payment through.
+
+```bash
+python examples/guardteam_demo.py   # watch the 4 agents; fraud blocked + escalated, legit approved
+```
+
+→ Proposal + 初赛 作品简介: [`docs/GOAI_INFRA_PROPOSAL.md`](docs/GOAI_INFRA_PROPOSAL.md) ·
+Deck: [`web/pitch.html`](https://jiangmuran.github.io/sentinel/pitch.html) ·
+Code: [`guardteam/`](guardteam/)
+
+Everything below is the **Sentinel engine** that powers GuardTeam's Skills.
+
+---
+
 ### See it stop a theft (60 seconds)
 
 ```bash
