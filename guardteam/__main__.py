@@ -129,7 +129,9 @@ def cmd_bench(args) -> int:
 
 def cmd_serve_mcp(args) -> int:
     from .mcp_server import mcp
-    mcp.run()
+    # stdio (default, CI-verified) for local/subprocess use; streamable-http/sse
+    # for a networked deployment behind a gateway (Higress on AgentTeams).
+    mcp.run(transport=args.transport)
     return 0
 
 
@@ -163,6 +165,8 @@ def build_parser() -> argparse.ArgumentParser:
     b.set_defaults(func=cmd_bench)
 
     m = sub.add_parser("serve-mcp", help="run the Sentinel Skills MCP server")
+    m.add_argument("--transport", default="stdio",
+                   choices=["stdio", "sse", "streamable-http"])
     m.set_defaults(func=cmd_serve_mcp)
     return p
 

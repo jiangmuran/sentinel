@@ -1,0 +1,21 @@
+# Sentinel Skills MCP server — local/staging deployment.
+#
+#   docker compose -f deploy/docker-compose.yml up --build
+#
+# An AgentTeams Worker (or the Higress gateway) then points its MCP client at
+# http://localhost:8000. The signing secret lives here, not in any Worker.
+services:
+  sentinel-skills:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    image: sentinel-skills
+    ports:
+      - "8000:8000"
+    environment:
+      GUARDTEAM_SECRET: "${GUARDTEAM_SECRET:-change-me-in-prod}"
+      GUARDTEAM_CURRENCY: "CNY"
+      GUARDTEAM_MAX_AMOUNT: "5000"
+      GUARDTEAM_ALLOWLIST: "acct-CLAIMANT-88,acct-MERCHANT-001"
+      GUARDTEAM_BUDGET: "20000"
+    restart: unless-stopped
