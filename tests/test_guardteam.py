@@ -94,6 +94,54 @@ class TestGuardTeam(unittest.TestCase):
             self.assertTrue(s.name and s.inputs and s.outputs and s.failure and s.reuse)
 
 
+class TestRiskScreener(unittest.TestCase):
+    def _screener(self, **kw):
+        from guardteam import RiskScreener
+        # frozen clock so velocity/duplicate windows are deterministic
+        return RiskScreener(clock=lambda: 1000.0, **kw)
+
+    def test_blocklist_hit_flags_high(self):
+        s = self._screener(blocklist=frozenset({"acct-BAD"}))
+        self.assertEqual(s.assess("acct-BAD", 10)["level"], "high")
+        self.assertEqual(s.assess("acct-GOOD", 10)["level"], "low")
+
+    def test_velocity_trips_after_limit(self):
+        s = self._screener(velocity_max=2)
+        self.assertEqual(s.assess("acct-A", 10)["level"], "low")   # 1st
+        self.assertEqual(s.assess("acct-A", 20)["level"], "low")   # 2nd
+        self.assertEqual(s.assess("acct-A", 30)["level"], "high")  # 3rd → over
+
+    def test_duplicate_same_recipient_amount(self):
+        s = self._screener()
+        self.assertEqual(s.assess("acct-A", 500)["level"], "low")
+        r = s.assess("acct-A", 500)  # same recipient+amount within window
+        self.assertTrue(any("重复" in f for f in r["findings"]))
+
+    def test_amount_anomaly(self):
+        s = self._screener(amount_alert=1000)
+        self.assertEqual(s.assess("acct-A", 999)["level"], "low")
+        self.assertEqual(s.assess("acct-B", 1001)["level"], "high")
+
+
+class TestHeldForReview(unittest.TestCase):
+    def test_high_risk_but_in_mandate_is_held_not_paid(self):
+        from guardteam import GuardTeam, RiskScreener
+        m = Mandate.issue(SECRET, agent_id="claims", max_amount=5000.0, currency="CNY",
+                          allowed_recipients=("acct-CLAIMANT-88",),
+                          expires_at=9_999_999_999.0, nonce="n1", total_budget=20000.0)
+        # recipient is in the mandate allow-list, but on the risk blocklist
+        team = GuardTeam(m, SECRET,
+                         screener=RiskScreener(blocklist=frozenset({"acct-CLAIMANT-88"})))
+        final, room = team.handle_case(
+            "h1",
+            signals=[{"source": "ledger", "text": "理赔 ¥1200,材料齐全。", "trusted": True}],
+            proposed_payout={"to": "acct-CLAIMANT-88", "amount": 1200})
+        self.assertEqual(final["decision"], "held")           # not auto-paid
+        self.assertEqual(final["enforcement"], "approved")    # mandate cleared it
+        self.assertIn("handoff", room.blackboard)             # human-in-the-loop
+        self.assertTrue(any("风险名单" in r for r in final["reasons"]))
+
+
 class _FakeBlock:
     type = "text"
     text = '{"level":"high","reason":"suspicious recipient"}'
@@ -129,7 +177,7 @@ class TestClaudeBrain(unittest.TestCase):
         final, _ = team.handle_case(
             "cc", [{"source": "l", "text": "ok", "trusted": True}],
             {"to": "acct-OK", "amount": 10})
-        self.assertIn(final["decision"], ("approved", "blocked"))
+        self.assertIn(final["decision"], ("approved", "blocked", "held"))
 
 
 if __name__ == "__main__":

@@ -89,9 +89,11 @@ class SignalAggregator(Agent):
 class RiskLocator(Agent):
     name = "locator"
 
-    def __init__(self, prov: ProvenanceSkill, brain: Brain | None = None):
+    def __init__(self, prov: ProvenanceSkill, brain: Brain | None = None,
+                 screener: "RiskScreener | None" = None):
         self.prov = prov
         self.brain = brain or NullBrain()
+        self.screener = screener
 
     def handle(self, msg: Message, room: Room) -> list[Message]:
         payout = room.blackboard["proposed_payout"]
@@ -108,6 +110,13 @@ class RiskLocator(Agent):
         # Deterministic provenance is authoritative; the LLM brain may only
         # *raise* risk and add narrative — it can never lower it.
         level = "high" if (tainted or flagged) else "low"
+        # Domain risk screening — blocklist / velocity / duplicate / amount anomaly.
+        if self.screener is not None:
+            sc = self.screener.assess(str(payout.get("to", "")), payout.get("amount"))
+            if sc["findings"]:
+                findings.extend(sc["findings"])
+            if sc["level"] == "high":
+                level = "high"
         b = self.brain.decide("locator", {"payout": payout, "flagged": flagged,
                                           "det_level": level})
         if isinstance(b, dict):
@@ -154,17 +163,32 @@ class ComplianceAuditor(Agent):
         action = room.blackboard["action"]
         receipt = self.enforce.run(room.case_id, action["to"], action["amount"])
         room.blackboard["receipt"] = receipt
+        disposition = room.blackboard.get("disposition")
+        risk = room.blackboard.get("risk", {})
+        # Three-way outcome:
+        #   blocked  — enforcement (mandate/provenance) rejected it (hard, signed)
+        #   held     — enforcement clears it, but risk screening flagged it → a
+        #              human must approve before it settles (not auto-paid)
+        #   approved — clean and low-risk
+        if not receipt.approved:
+            decision, reasons = "blocked", list(receipt.reasons)
+        elif disposition == "review":
+            decision = "held"
+            reasons = list(risk.get("findings", [])) or ["flagged for manual review"]
+        else:
+            decision, reasons = "approved", list(receipt.reasons)
         final = {
-            "decision": receipt.decision,
-            "reasons": list(receipt.reasons),
+            "decision": decision,
+            "enforcement": receipt.decision,
+            "reasons": reasons,
             "recipient": receipt.recipient,
             "amount": receipt.amount,
             "signature": receipt.signature[:16] + "…",
-            "disposition": room.blackboard.get("disposition"),
+            "disposition": disposition,
         }
         out = [Message(self.name, "manager", "final", final)]
-        # Human-in-the-loop: a blocked payout is escalated with signed evidence.
-        if not receipt.approved:
+        # Human-in-the-loop: anything not auto-approved escalates with evidence.
+        if decision != "approved":
             out.insert(0, Message(self.name, "human", "handoff", final))
         return out
 
@@ -204,10 +228,12 @@ class GuardTeam:
     Pass `brain` (an LLM brain) to make the analysis agents autonomous; the
     compliance auditor's enforcement stays deterministic regardless."""
 
-    def __init__(self, mandate: Mandate, secret: str, brain: Brain | None = None):
+    def __init__(self, mandate: Mandate, secret: str, brain: Brain | None = None,
+                 screener: "RiskScreener | None" = None):
         self.mandate = mandate
         self.secret = secret
         self.brain = brain or NullBrain()
+        self.screener = screener
 
     def _room(self, case_id: str) -> Room:
         sentinel = Sentinel(policy=Policy(tools={"create_payment": ToolRule(stakes="high")}))
@@ -222,7 +248,7 @@ class GuardTeam:
         enforce = EnforcementSkill(room.guard)
         manager = Manager([
             SignalAggregator(scan, prov),
-            RiskLocator(prov, self.brain),
+            RiskLocator(prov, self.brain, self.screener),
             DispositionPlanner(self.brain),
             ComplianceAuditor(enforce),
         ])
