@@ -257,7 +257,7 @@ class GuardTeam:
         return Room(case_id, sentinel, guard)
 
     def handle_case(self, case_id: str, signals: list[dict],
-                    proposed_payout: dict) -> tuple[dict, Room]:
+                    proposed_payout: dict, ledger=None) -> tuple[dict, Room]:
         room = self._room(case_id)
         scan = InjectionScanSkill(room.sentinel.detector)
         prov = ProvenanceSkill(room.sentinel)
@@ -271,4 +271,8 @@ class GuardTeam:
         init = Message("manager", "aggregator", "case.new",
                        {"signals": signals, "proposed_payout": proposed_payout})
         final = manager.run(room, init)
+        # Optional tamper-evident audit trail: append this decision to the ledger.
+        if ledger is not None:
+            from .ledger import case_record
+            ledger.append(case_record(case_id, final, room))
         return final, room

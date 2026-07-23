@@ -69,8 +69,15 @@ def cmd_case(args) -> int:
     else:
         secret = data.get("secret", DEFAULT_SECRET)
         team = GuardTeam(_mandate_from(data, secret), secret, screener=_screener_from(data))
+    ledger = None
+    if args.ledger:
+        from .ledger import AuditLedger
+        p = Path(args.ledger)
+        ledger = AuditLedger.load(p, team.secret) if p.exists() else AuditLedger(secret=team.secret)
     final, room = team.handle_case(
-        data.get("case_id", "cli"), data["signals"], data["proposed_payout"])
+        data.get("case_id", "cli"), data["signals"], data["proposed_payout"], ledger=ledger)
+    if ledger is not None:
+        ledger.save(args.ledger)
     if args.transcript:
         final = dict(final, transcript=[
             {"from": m.frm, "to": m.to, "kind": m.kind} for m in room.transcript])
@@ -130,6 +137,13 @@ def cmd_bench(args) -> int:
     return 0 if ok else 1
 
 
+def cmd_audit(args) -> int:
+    from .ledger import AuditLedger
+    result = AuditLedger.load(args.file, args.secret).verify()
+    _emit(result)
+    return 0 if result["ok"] else 1
+
+
 def cmd_serve_mcp(args) -> int:
     from .mcp_server import mcp
     # stdio (default, CI-verified) for local/subprocess use; streamable-http/sse
@@ -151,6 +165,8 @@ def build_parser() -> argparse.ArgumentParser:
     c.add_argument("--transcript", action="store_true", help="include the agent transcript")
     c.add_argument("--config", help="team config JSON (mandate + screener); "
                                     "overrides any inline in the case file")
+    c.add_argument("--ledger", help="append this decision to a tamper-evident "
+                                    "audit ledger (JSONL, created if absent)")
     c.set_defaults(func=cmd_case)
 
     a = sub.add_parser("authorize", help="enforce a payment against the mandate → receipt")
@@ -168,6 +184,11 @@ def build_parser() -> argparse.ArgumentParser:
     b = sub.add_parser("bench", help="run SentinelBench + CommerceBench scorecard")
     b.add_argument("--json", action="store_true")
     b.set_defaults(func=cmd_bench)
+
+    au = sub.add_parser("audit", help="verify a tamper-evident audit ledger")
+    au.add_argument("file")
+    au.add_argument("--secret", default=DEFAULT_SECRET)
+    au.set_defaults(func=cmd_audit)
 
     m = sub.add_parser("serve-mcp", help="run the Sentinel Skills MCP server")
     m.add_argument("--transport", default="stdio",

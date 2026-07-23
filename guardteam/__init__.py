@@ -12,6 +12,7 @@ if _src not in _sys.path:
 from .brain import Brain, CallableBrain, LLMBrain, NullBrain  # noqa: E402
 from .claude_brain import ClaudeBrain  # noqa: E402
 from .screening import RiskScreener  # noqa: E402
+from .ledger import AuditLedger, case_record  # noqa: E402
 from .skills import (  # noqa: E402
     EnforcementSkill,
     InjectionScanSkill,
@@ -38,5 +39,5 @@ __all__ = [
     "InjectionScanSkill", "ProvenanceSkill", "EnforcementSkill",
     "SkillSpec", "SkillResult", "SKILL_SPECS",
     "Brain", "NullBrain", "CallableBrain", "LLMBrain", "ClaudeBrain",
-    "RiskScreener",
+    "RiskScreener", "AuditLedger", "case_record",
 ]
