@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0C111B"/><stop offset="1" stop-color="#16212F"/>
+    </linearGradient>
+    <linearGradient id="amber" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#E8B341"/><stop offset="1" stop-color="#F3C866"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="300" rx="18" fill="url(#bg)"/>
+  <rect x="1" y="1" width="1198" height="298" rx="17" fill="none" stroke="#233040"/>
+
+  <!-- shield -->
+  <g transform="translate(48,44)">
+    <path d="M20 2 5 8v10c0 8 5.5 14 15 18 9.5-4 15-10 15-18V8L20 2Z" fill="none" stroke="url(#amber)" stroke-width="2.4" stroke-linejoin="round"/>
+    <path d="M13 19 18 24 28 13" fill="none" stroke="url(#amber)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="100" y="60" fill="#F4F7FB" font-size="34" font-weight="800" letter-spacing="-.5">Sentinel GuardTeam</text>
+  <text x="100" y="90" fill="#93A0B4" font-size="16" font-family="ui-monospace,SFMono-Regular,Menlo,monospace">支付风控 · 多智能体自主闭环 · GOAI 新智基座 · Apache-2.0</text>
+
+  <!-- agent flow -->
+  <g font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,sans-serif">
+    <!-- node template -->
+    <g transform="translate(40,128)">
+      <rect width="240" height="74" rx="13" fill="#121A28" stroke="#2C3B4E"/>
+      <text x="18" y="28" fill="#63718A" font-size="12" font-family="ui-monospace,monospace">① Worker</text>
+      <text x="18" y="52" fill="#F4F7FB" font-size="19" font-weight="700">信号聚合</text>
+    </g>
+    <g transform="translate(320,128)">
+      <rect width="240" height="74" rx="13" fill="#121A28" stroke="#2C3B4E"/>
+      <text x="18" y="28" fill="#63718A" font-size="12" font-family="ui-monospace,monospace">② Worker</text>
+      <text x="18" y="52" fill="#F4F7FB" font-size="19" font-weight="700">风险定位</text>
+    </g>
+    <g transform="translate(600,128)">
+      <rect width="240" height="74" rx="13" fill="#121A28" stroke="#2C3B4E"/>
+      <text x="18" y="28" fill="#63718A" font-size="12" font-family="ui-monospace,monospace">③ Worker</text>
+      <text x="18" y="52" fill="#F4F7FB" font-size="19" font-weight="700">处置方案</text>
+    </g>
+    <g transform="translate(880,128)">
+      <rect width="280" height="74" rx="13" fill="#1A1608" stroke="#E8B341"/>
+      <text x="18" y="28" fill="#E8B341" font-size="12" font-family="ui-monospace,monospace">④ Worker · Sentinel</text>
+      <text x="18" y="52" fill="#F4F7FB" font-size="19" font-weight="700">合规审计 <tspan fill="#E8B341" font-size="14">🛡</tspan></text>
+    </g>
+    <!-- arrows -->
+    <g stroke="#63718A" stroke-width="2" fill="none">
+      <path d="M284 165 h30" marker-end="url(#a)"/>
+      <path d="M564 165 h30" marker-end="url(#a)"/>
+      <path d="M844 165 h30" marker-end="url(#a)"/>
+    </g>
+    <defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <path d="M0 0 L7 4 L0 8" fill="#63718A"/></marker></defs>
+  </g>
+
+  <!-- verdict chips -->
+  <g font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="14">
+    <rect x="40" y="238" width="470" height="34" rx="9" fill="#241318" stroke="#F2585C"/>
+    <text x="58" y="260" fill="#F2585C" font-weight="700">✘ 越权 / 被注入 → 结算前熔断 + 转人工 + 签名回执</text>
+    <rect x="528" y="238" width="360" height="34" rx="9" fill="#0E241E" stroke="#35D492"/>
+    <text x="546" y="260" fill="#35D492" font-weight="700">✔ 合规放款 → 通过 + 签名回执</text>
+    <text x="912" y="260" fill="#93A0B4">LLM 提议,Sentinel 裁决</text>
+  </g>
+</svg>

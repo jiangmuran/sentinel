@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/banner.svg" alt="Sentinel GuardTeam — 多智能体支付风控自主闭环" width="100%"></p>
+
 # Sentinel — the runtime enforcement layer for agent payments
 
 *English · [中文](README.zh.md)*

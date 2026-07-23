@@ -49,6 +49,15 @@
   .mandate{font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--surface-2);
     border:1px solid var(--line);border-radius:9px;padding:9px 13px;margin-top:14px}
   .mandate b{color:var(--brand)}
+  .signals{margin-top:12px;display:none;flex-direction:column;gap:7px}
+  .signals .sig{font-family:var(--mono);font-size:12px;background:var(--surface);border:1px solid var(--line);
+    border-radius:9px;padding:8px 12px;color:var(--muted);display:flex;gap:10px;align-items:baseline}
+  .signals .sig .src{color:var(--faint);flex:none;min-width:104px}
+  .signals .sig.untrusted{border-left:3px solid var(--warn)}
+  .signals .sig.poison{border-color:var(--threat);border-left:3px solid var(--threat);color:var(--ink)}
+  .signals .sig .tag{margin-left:auto;font-size:10px;padding:1px 7px;border-radius:5px;flex:none;white-space:nowrap}
+  .signals .sig.untrusted .tag{background:color-mix(in srgb,var(--warn) 20%,var(--surface));color:var(--warn)}
+  .signals .sig.poison .tag{background:var(--threat);color:#fff}
 
   /* agent flow */
   .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px;position:relative}
@@ -122,6 +131,7 @@
     <span class="hint" id="hint">选一个案件开始</span>
   </div>
   <div class="mandate" id="mandate"></div>
+  <div class="signals" id="signals"></div>
 
   <div class="flow" id="flow"></div>
 
@@ -204,6 +214,18 @@
       hint=document.getElementById("hint"),
       bFraud=document.getElementById("runFraud"), bLegit=document.getElementById("runLegit");
 
+  var sigEl=document.getElementById("signals");
+  function renderSignals(c){
+    sigEl.style.display="flex"; sigEl.innerHTML="";
+    c.signals.forEach(function(s,i){
+      var d=document.createElement("div");
+      d.className="sig"+(s.trusted?"":" untrusted"); d.id="sig-"+i;
+      d.innerHTML='<span class="src">'+s.source+'</span><span class="txt">'+s.text+'</span>'+
+        (s.trusted?'':'<span class="tag">不可信</span>');
+      sigEl.appendChild(d);
+    });
+  }
+
   function line(frm,to,k,note,block){
     var d=document.createElement("div"); d.className="msg"+(block?" block":"");
     d.innerHTML='<span class="frm">'+frm+'</span> <span class="arw">→</span> <span class="to">'+to+
@@ -217,16 +239,24 @@
     bFraud.disabled=bLegit.disabled=true; hint.textContent="运行中…";
     transcript.innerHTML=""; verdict.innerHTML='<div class="vbanner idle">运行中…</div>'; resetAgents();
     var c=CASES[kind], taint=[], flaggedSrc=[];
+    renderSignals(c);
 
     // Manager kicks off
     line("🧭 Manager","① 信号聚合","case.new"); await sleep(500);
 
     // ① aggregator
     setAgent("aggregator","active","扫描信号…"); await sleep(650);
-    c.signals.forEach(function(s){
+    c.signals.forEach(function(s,i){
       var hit=scan(s.text);
       if(!s.trusted){ taint=taint.concat(tokens(s.text)); }   // taint untrusted content
-      if(hit){ flaggedSrc.push(s.source); }
+      if(hit){
+        flaggedSrc.push(s.source);
+        var d=document.getElementById("sig-"+i);
+        if(d){ d.className="sig poison";
+          var tg=d.querySelector(".tag");
+          if(tg){ tg.textContent="⚠ 注入 "+hit.split(" ")[0]; }
+          else{ d.insertAdjacentHTML("beforeend",'<span class="tag">⚠ 注入</span>'); } }
+      }
     });
     setAgent("aggregator","done", flaggedSrc.length? "标记可疑: "+flaggedSrc.join(","):"信号已归集");
     line("① 信号聚合","② 风险定位","case.normalized", flaggedSrc.length?("flagged: "+flaggedSrc.join(",")):null);
