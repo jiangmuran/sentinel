@@ -2,14 +2,13 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<title>Sentinel — pitch deck</title>
+<title>Sentinel GuardTeam — 初赛 Pitch Deck</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   :root{
     --ground:#0C111B; --surface:#121A28; --surface-2:#18222F;
     --ink:#E7ECF3; --strong:#F4F7FB; --muted:#93A0B4; --faint:#63718A;
-    --line:#233040; --line-2:#2C3B4E;
-    --brand:#E8B341; --brand-2:#F3C866;
+    --line:#233040; --line-2:#2C3B4E; --brand:#E8B341; --brand-2:#F3C866;
     --threat:#F2585C; --safe:#35D492; --warn:#E8B341;
     --mono:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",system-ui,Roboto,sans-serif;
@@ -17,8 +16,7 @@
   :root[data-theme="light"]{
     --ground:#F5F7FA; --surface:#FFFFFF; --surface-2:#EEF2F7;
     --ink:#111927; --strong:#0A0F18; --muted:#586477; --faint:#8A95A6;
-    --line:#DCE3EC; --line-2:#C6D1DE;
-    --brand:#B4780F; --brand-2:#8a5c08;
+    --line:#DCE3EC; --line-2:#C6D1DE; --brand:#B4780F; --brand-2:#8a5c08;
     --threat:#CE2F35; --safe:#0E8A5F; --warn:#B26A00;
   }
   *{box-sizing:border-box}
@@ -26,48 +24,50 @@
   body{background:var(--ground);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden}
   ::selection{background:var(--brand-2);color:#0A0F18}
   .deck{height:100vh;height:100dvh;position:relative}
-  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;padding:clamp(28px,6vw,96px);overflow:auto}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;padding:clamp(26px,6vw,92px);overflow:auto}
   .slide.active{display:flex;animation:fade .4s ease}
   @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   .inner{max-width:1000px;margin:0 auto;width:100%}
-  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.4vw,13px);letter-spacing:.18em;text-transform:uppercase;color:var(--brand);font-weight:600;margin-bottom:22px;display:flex;gap:.7em;align-items:center}
+  .eyebrow{font-family:var(--mono);font-size:clamp(11px,1.4vw,13px);letter-spacing:.16em;text-transform:uppercase;color:var(--brand);font-weight:600;margin-bottom:20px;display:flex;gap:.7em;align-items:center}
   .eyebrow .n{color:var(--faint)}
-  h1{font-size:clamp(32px,6vw,68px);line-height:1.03;letter-spacing:-.025em;margin:0;font-weight:800;color:var(--strong);text-wrap:balance}
-  h2{font-size:clamp(26px,4.2vw,44px);line-height:1.07;letter-spacing:-.02em;margin:0 0 18px;font-weight:800;color:var(--strong);text-wrap:balance}
-  p{font-size:clamp(16px,2.1vw,21px);line-height:1.55;color:var(--muted);margin:0;max-width:42ch}
-  p.wide{max-width:64ch}
-  .big{font-size:clamp(19px,2.6vw,25px);color:var(--ink)}
+  h1{font-size:clamp(30px,5.6vw,64px);line-height:1.05;letter-spacing:-.02em;margin:0;font-weight:800;color:var(--strong);text-wrap:balance}
+  h2{font-size:clamp(24px,4vw,42px);line-height:1.1;letter-spacing:-.015em;margin:0 0 16px;font-weight:800;color:var(--strong);text-wrap:balance}
+  p{font-size:clamp(16px,2.1vw,21px);line-height:1.6;color:var(--muted);margin:0;max-width:44ch}
+  p.wide{max-width:66ch}
+  .big{font-size:clamp(18px,2.5vw,24px);color:var(--ink)}
   strong{color:var(--strong)} .mono{font-family:var(--mono)} .brand{color:var(--brand)}
-  .lede{margin-top:20px}
-  /* the 内行 track: a precise mono proof line under the 外行 claim */
-  .proof{font-family:var(--mono);font-size:clamp(12px,1.5vw,14.5px);color:var(--faint);
-    margin-top:22px;padding-left:14px;border-left:2px solid var(--brand);line-height:1.5;max-width:62ch}
+  .lede{margin-top:18px}
+  .proof{font-family:var(--mono);font-size:clamp(11.5px,1.5vw,14px);color:var(--faint);margin-top:20px;padding-left:14px;border-left:2px solid var(--brand);line-height:1.55;max-width:66ch}
   .proof b{color:var(--muted);font-weight:600}
-  .badges{display:flex;gap:9px;flex-wrap:wrap;margin-top:30px}
+  .badges{display:flex;gap:9px;flex-wrap:wrap;margin-top:28px}
   .badge{font-family:var(--mono);font-size:12px;border:1px solid var(--line-2);border-radius:999px;padding:6px 13px;color:var(--muted)}
   .badge.hot{border-color:var(--brand);color:var(--brand)}
-  .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:26px}
-  .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:26px}
-  @media(max-width:760px){.cols3,.cols{grid-template-columns:1fr}}
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:18px 20px}
+  .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:24px}
+  .cols4{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-top:24px}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:24px}
+  @media(max-width:760px){.cols3,.cols4,.cols{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
   .card.bad{border-color:var(--threat)} .card.good{border-color:var(--safe)}
-  .card .t{font-family:var(--mono);font-size:12px;letter-spacing:.05em;margin-bottom:8px}
-  .card h3{margin:0 0 6px;font-size:clamp(16px,2vw,20px);color:var(--strong)}
-  .card p{font-size:14px;line-height:1.5}
-  .stat-row{display:flex;gap:13px;flex-wrap:wrap;margin-top:30px}
-  .stat{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:15px 19px;min-width:120px}
-  .stat .v{font-family:var(--mono);font-weight:800;font-size:clamp(23px,3.2vw,32px);color:var(--strong);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .card .t{font-family:var(--mono);font-size:12px;letter-spacing:.04em;margin-bottom:7px;color:var(--brand)}
+  .card h3{margin:0 0 5px;font-size:clamp(15px,1.9vw,18px);color:var(--strong)}
+  .card p{font-size:13.5px;line-height:1.5}
+  .stat-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;min-width:110px}
+  .stat .v{font-family:var(--mono);font-weight:800;font-size:clamp(22px,3vw,30px);color:var(--strong);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
   .stat .v.good{color:var(--safe)}
-  .stat .l{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin-top:6px}
-  ul.clean{list-style:none;padding:0;margin:22px 0 0;display:flex;flex-direction:column;gap:12px}
-  ul.clean li{display:flex;gap:13px;align-items:flex-start;font-size:clamp(15px,1.9vw,19px);color:var(--ink)}
+  .stat .l{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-top:5px}
+  ul.clean{list-style:none;padding:0;margin:20px 0 0;display:flex;flex-direction:column;gap:11px}
+  ul.clean li{display:flex;gap:12px;align-items:flex-start;font-size:clamp(15px,1.9vw,19px);color:var(--ink)}
   ul.clean li .m{color:var(--brand);font-family:var(--mono);flex:none;font-weight:700}
   ul.clean li b{color:var(--strong)}
-  .flow{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:24px;font-family:var(--mono);font-size:clamp(11px,1.5vw,14px)}
-  .node{padding:7px 13px;border:1px solid var(--line-2);border-radius:9px;background:var(--surface);color:var(--muted)}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:22px;font-family:var(--mono);font-size:clamp(11px,1.5vw,14px)}
+  .node{padding:7px 12px;border:1px solid var(--line-2);border-radius:9px;background:var(--surface);color:var(--muted)}
   .node.gate{border-color:var(--brand);color:var(--brand);font-weight:700}
   .arw{color:var(--faint)}
-  .quote{font-size:clamp(21px,3.3vw,36px);line-height:1.25;color:var(--strong);font-weight:700;letter-spacing:-.015em;text-wrap:balance;max-width:22ch}
+  .quote{font-size:clamp(20px,3.2vw,34px);line-height:1.28;color:var(--strong);font-weight:700;letter-spacing:-.015em;text-wrap:balance;max-width:24ch}
+  .term{background:#0B1220;border:1px solid var(--line-2);border-radius:12px;padding:16px 18px;margin-top:22px;font-family:var(--mono);font-size:clamp(11px,1.45vw,13.5px);line-height:1.7;color:#C7D2E4;overflow-x:auto}
+  :root[data-theme="light"] .term{background:#0D1526}
+  .term .dim{color:#5E708C} .term .red{color:#F2585C} .term .grn{color:#35D492} .term .amb{color:#E8B341}
   .chrome{position:fixed;left:0;right:0;bottom:0;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(18px,4vw,40px);z-index:20;pointer-events:none}
   .dots{display:flex;gap:7px;pointer-events:auto}
   .dot{width:8px;height:8px;border-radius:50%;background:var(--line-2);border:0;padding:0;cursor:pointer;transition:.2s}
@@ -85,125 +85,142 @@
 </head>
 <body>
 <div class="progress" id="progress"></div>
-<div class="hint">← → 翻页 · big=外行 / mono=内行</div>
+<div class="hint">← → 翻页 · 大字给外行 / mono 给内行</div>
 
 <div class="deck" id="deck">
 
   <!-- 1 TITLE -->
   <section class="slide active"><div class="inner">
-    <div class="eyebrow">GOAI · 新智基座 / Agent Infra · Apache-2.0</div>
-    <h1>会花钱的 AI，<br>需要一个实时盗刷断路器。</h1>
-    <p class="lede big" style="max-width:34ch"><strong>Sentinel</strong> 是 AI 智能体支付的<strong>运行时执行层</strong>——在钱转出去之前，拦下越权或被操纵的那一笔。</p>
-    <div class="proof">runtime enforcement for agent payments · signed mandate + provenance + tamper-evident receipt · rail-agnostic (AP2 / x402 / MPP)</div>
-    <div class="badges"><span class="badge hot">开源 · Apache-2.0</span><span class="badge">零依赖</span><span class="badge">已在真实 MCP 协议跑通</span></div>
+    <div class="eyebrow">GOAI · 新智基座 / Agent Infra · 方向 #4 金融风控与理赔自动化</div>
+    <h1>Sentinel GuardTeam<br><span style="font-size:.5em;font-weight:700;color:var(--muted)">支付风控 · 多智能体自主闭环</span></h1>
+    <p class="lede big" style="max-width:36ch">一个基于 <strong>AgentTeams</strong> 的多 Agent 风控闭环,由自研安全执行层 <strong>Sentinel</strong> 提供"安全 + 合规审计"骨干 Skill。</p>
+    <div class="proof">AgentTeams Manager-Workers · 4 个职能 Agent · 4 个 Sentinel Skills(MCP)· 开源 Apache-2.0 · 54 测试</div>
+    <div class="badges"><span class="badge hot">github.com/jiangmuran/sentinel</span><span class="badge">中英文</span><span class="badge">零依赖可跑</span></div>
   </div></section>
 
   <!-- 2 SHIFT -->
   <section class="slide"><div class="inner">
     <div class="eyebrow"><span class="n">01</span> 拐点</div>
-    <h2>2026 年，AI 智能体开始有<span class="brand">钱包</span>。</h2>
-    <p class="wide big">它们自己付 API、买算力、下单购物、甚至雇佣别的智能体。Stripe、Coinbase、Google、Visa、万事达都在为此铺轨道。</p>
-    <div class="proof">agent payment rails shipping now: Stripe <b>MPP</b> · Coinbase <b>x402</b> · Google <b>AP2</b> · Mastercard/Visa agent pay</div>
+    <h2>2026,风控与理赔正在被<span class="brand">多 Agent</span>接管。</h2>
+    <p class="wide big">交易监控、反欺诈、理赔核验——多 Agent 系统自动完成"信号聚合 → 定位 → 处置 → 审计"的闭环。而且这些 Agent 开始能<strong>直接动钱</strong>。</p>
+    <div class="proof">agent payment rails: Stripe MPP · x402 · AP2;multi-agent 框架: AgentTeams(阿里云 AgentScope)· Manager-Workers</div>
   </div></section>
 
   <!-- 3 PROBLEM -->
   <section class="slide"><div class="inner">
-    <div class="eyebrow"><span class="n">02</span> 问题 · 已经真实发生</div>
-    <h2>一个有钱包的智能体 + 一个投毒网页<br>= 钱被转给攻击者。</h2>
-    <p class="wide">不可信内容驱动了一个越权动作——Aim Security 称之为 <strong>LLM 作用域越权</strong>，是 2025 一连串真实事件的根因。</p>
-    <div class="cols3">
-      <div class="card"><div class="t" style="color:var(--threat)">CVE-2025-32711</div><h3>EchoLeak</h3><p>零点击，一封邮件从 Copilot 外泄数据。</p></div>
-      <div class="card"><div class="t" style="color:var(--threat)">2025-05</div><h3>GitHub MCP</h3><p>恶意 issue 诱导智能体泄露私有仓库。</p></div>
-      <div class="card"><div class="t" style="color:var(--threat)">2025-04</div><h3>工具投毒</h3><p>工具描述里的隐藏指令劫持智能体。</p></div>
+    <div class="eyebrow"><span class="n">02</span> 新风险 · 已经真实发生</div>
+    <h2>一个有钱包的 Agent + 一张投毒工单<br>= Agent 自己把钱放给攻击者。</h2>
+    <p class="wide">不可信的工单/上游数据可以操纵风控 Agent 越权放款。这就是 Aim Security 命名的 <strong>LLM 作用域越权</strong>(EchoLeak / CVE-2025-32711 一类)。现有多 Agent 框架解决"怎么协同",不解决"协同过程中的动作是否可信"。</p>
+    <div class="proof">threat: untrusted content → privileged payout;现有框架无运行时防御</div>
+  </div></section>
+
+  <!-- 4 SYSTEM -->
+  <section class="slide"><div class="inner">
+    <div class="eyebrow"><span class="n">03</span> 系统 · 4-Agent 自主闭环</div>
+    <h2>四个职能 Agent,经 Manager 编排,形成完整闭环。</h2>
+    <div class="flow">
+      <span class="node">① 信号聚合</span><span class="arw">→</span>
+      <span class="node">② 风险定位</span><span class="arw">→</span>
+      <span class="node">③ 处置方案</span><span class="arw">→</span>
+      <span class="node gate">④ 合规审计</span>
     </div>
-  </div></section>
-
-  <!-- 4 WHAT GIANTS BUILT -->
-  <section class="slide"><div class="inner">
-    <div class="eyebrow"><span class="n">03</span> 巨头修了路，但少了一道闸</div>
-    <h2>他们做<span class="brand">轨道</span>和<span class="brand">事后记录</span>。<br>没人做<span class="brand">运行时执行</span>。</h2>
-    <p class="wide big">支付轨道(x402/AP2/MPP)解决"怎么付"；Mastercard+Google 的 Verifiable Intent(2026-03 开源)解决"事后留档给纠纷"。</p>
-    <div class="proof">gap nobody owns: at the moment of the transaction, <b>enforce that it stays in its signed mandate AND wasn't injection-induced — BEFORE settlement.</b> Verifiable Intent records after the fact; it does not prevent.</div>
-  </div></section>
-
-  <!-- 5 INSIGHT -->
-  <section class="slide"><div class="inner">
-    <div class="eyebrow"><span class="n">04</span> 洞察</div>
-    <p class="quote">在钱转出去<span class="brand">之前</span>，校验这笔交易是否越权、是否被操纵。</p>
-    <p class="proof" style="margin-top:26px;font-size:clamp(13px,1.7vw,16px)"><b>3 道独立检查</b>，每笔高危交易结算前跑一遍：<br>① 签名 <b>mandate</b>：金额上限 / 收款白名单 / 有效期 / HMAC 防篡改<br>② <b>provenance</b>：金额或收款方是否溯源到不可信内容(污点追踪)<br>③ 产出 <b>签名回执</b>：approve/block 的防篡改记录，可用于纠纷</p>
-  </div></section>
-
-  <!-- 6 DEMO / MONEY SHOT -->
-  <section class="slide"><div class="inner">
-    <div class="eyebrow"><span class="n">05</span> Demo · <span class="mono">python examples/commerce_demo.py</span></div>
-    <h2>同一个瞬间，两种分辨率。</h2>
-    <div class="cols">
-      <div class="card bad"><div class="t" style="color:var(--threat)">✘ 拦下</div><h3>¥9999 → 陌生账户</h3><p class="mono" style="color:var(--faint);font-size:12.5px">超出上限 ¥50 · 不在白名单 · 收款方溯源到投毒页 · 结算前拦截 · 回执已签名</p></div>
-      <div class="card good"><div class="t" style="color:var(--safe)">✔ 通过</div><h3>¥49 → 真实商户</h3><p class="mono" style="color:var(--faint);font-size:12.5px">在授权范围内 · 来源可信 · 签名校验通过 · 正常结算</p></div>
-    </div>
-    <p style="margin-top:18px;font-size:15px;color:var(--faint)"><b style="color:var(--ink)">外行</b>看大字：钱被拦/被放行。<b style="color:var(--ink)">内行</b>看小字：三条独立理由 + 防篡改回执。精度是重点——不是"一刀切禁支付"。</p>
-  </div></section>
-
-  <!-- 7 HOW -->
-  <section class="slide"><div class="inner">
-    <div class="eyebrow"><span class="n">06</span> 怎么做到 · 轨道无关</div>
-    <h2>坐在智能体和支付轨道之间的一道闸。</h2>
-    <div class="flow"><span class="node">🤖 agent</span><span class="arw">→</span><span class="node gate">🛡 Sentinel</span><span class="arw">→</span><span class="node">💳 AP2 / x402 / MPP</span></div>
     <ul class="clean">
-      <li><span class="m">①</span><span><b>Mandate</b> — HMAC 签名的授权(额度/白名单/有效期)，防篡改</span></li>
-      <li><span class="m">②</span><span><b>Provenance</b> — 从不可信内容到交易参数的污点追踪，动作层拦截</span></li>
-      <li><span class="m">③</span><span><b>Receipt</b> — 结算前产出的签名回执，与 Verifiable Intent 互补</span></li>
+      <li><span class="m">①</span><span><b>信号聚合</b> — 归集交易流水/告警/工单,对不可信数据做注入检测并打污点</span></li>
+      <li><span class="m">②</span><span><b>风险定位</b> — 结合 <b>provenance</b> 判断可疑收款方是否来自不可信信号</span></li>
+      <li><span class="m">③</span><span><b>处置方案</b> — 生成 放款/复核/拒绝(可 LLM 驱动)</span></li>
+      <li><span class="m">④</span><span><b>合规审计</b> — Sentinel 结算前强制校验 + 产出签名回执,阻塞则<b>转人工</b></span></li>
     </ul>
-    <div class="proof">deterministic · stdlib-only (HMAC-SHA256) · complementary to the rails, not competitive</div>
+    <div class="proof">AgentTeams Manager-Workers · Matrix 房间人在回路 · MinIO 共享黑板 · 共享污点会话</div>
   </div></section>
 
-  <!-- 8 PROOF -->
+  <!-- 5 DIFFERENTIATOR -->
   <section class="slide"><div class="inner">
-    <div class="eyebrow"><span class="n">07</span> 是真的，而且可验证</div>
-    <h2>不是 PPT，是能跑、能验签的东西。</h2>
+    <div class="eyebrow"><span class="n">04</span> 差异化 · 为什么评委记得住</div>
+    <p class="quote"><span class="brand">LLM 提议,Sentinel 裁决。</span></p>
+    <p class="lede wide big">这是<strong>唯一一个 Agent 自己不会被提示注入劫持去乱付款</strong>的风控系统。分析 Agent 可以由 LLM 自主驱动;但每一笔放款的强制执行是<strong>确定性</strong>的——越权、超预算、或参数溯源到污点内容,结算前当场熔断。</p>
+    <div class="proof">even a hijacked brain that always says "pay" can't push a fraudulent payout through — <b>tested</b>. 直接吃满 20% "安全可审计"。</div>
+  </div></section>
+
+  <!-- 6 DEMO -->
+  <section class="slide"><div class="inner">
+    <div class="eyebrow"><span class="n">05</span> Demo · <span class="mono">python examples/guardteam_demo.py</span></div>
+    <h2>看 Agent 对话,看欺诈那笔被拦下。</h2>
+    <div class="term">
+<span class="dim">案件 A — 被投毒的理赔工单(欺诈)</span>
+🧭 Manager → ① 信号聚合   case.new
+① 信号聚合 → ② 风险定位   <span class="amb">flagged: email-ticket</span>
+② 风险定位 → ③ 处置方案   <span class="amb">收款方溯源到不可信信号 (污点 taint-0001)</span>
+③ 处置方案 → ④ 合规审计   disposition.proposed
+④ 合规审计 → 🙋 人工      handoff
+<span class="red">✘ 放款拦截 → 转人工   ¥4800 → acct-EVIL-6666</span>
+   <span class="dim">· 越白名单 · provenance 污点溯源(CJK001)· 签名回执 37500e5f…</span>
+
+<span class="grn">案件 B — 正常理赔:✔ 放款通过 ¥1200 → acct-CLAIMANT-88 + 签名回执</span></div>
+  </div></section>
+
+  <!-- 7 SKILLS -->
+  <section class="slide"><div class="inner">
+    <div class="eyebrow"><span class="n">06</span> Skill 工程体系(赛道必选项)</div>
+    <h2>4 个可复用 Sentinel Skill,已实现、已测试。</h2>
+    <div class="cols4">
+      <div class="card"><div class="t">injection.scan</div><h3>注入检测</h3><p>中英文 20+ 类;摄入外部数据时调用</p></div>
+      <div class="card"><div class="t">provenance.trace</div><h3>来源污点追踪</h3><p>不可信内容 → 动作参数的数据流</p></div>
+      <div class="card"><div class="t">mandate.check</div><h3>签名授权校验</h3><p>额度/白名单/有效期/累计预算</p></div>
+      <div class="card"><div class="t">receipt.sign</div><h3>签名回执</h3><p>防篡改;合规审计与纠纷取证</p></div>
+    </div>
+    <div class="proof">每个 Skill 有清晰 输入/输出/调用条件/失败处理/复用价值;经 MCP 接入每个 Worker,可跨 Team 复用</div>
+  </div></section>
+
+  <!-- 8 ARCH -->
+  <section class="slide"><div class="inner">
+    <div class="eyebrow"><span class="n">07</span> 架构 · 站在 AgentTeams 上</div>
+    <h2>复用 AgentTeams 的企业级底座,补上它缺的运行时安全。</h2>
+    <ul class="clean">
+      <li><span class="m">◆</span><span><b>AgentTeams Manager-Workers</b> 编排 4 个 Worker,Matrix 房间人在回路</span></li>
+      <li><span class="m">◆</span><span><b>Sentinel Skills 经 MCP 接入</b>(AgentTeams 原生支持声明式 MCP)</span></li>
+      <li><span class="m">◆</span><span><b>Higress 网关凭证隔离</b> + MinIO 共享上下文,直接复用</span></li>
+    </ul>
+    <div class="proof">现在:原生多 Agent 实现,零依赖可跑;复赛:部署为 AgentTeams 的 Worker + MCP Skill</div>
+  </div></section>
+
+  <!-- 9 PROOF -->
+  <section class="slide"><div class="inner">
+    <div class="eyebrow"><span class="n">08</span> 是真的,而且可验证</div>
+    <h2>不是 PPT,是能跑、能验签的代码。</h2>
     <div class="stat-row">
-      <div class="stat"><div class="v good">46</div><div class="l">测试 · 含真 MCP SDK</div></div>
-      <div class="stat"><div class="v good">100%</div><div class="l">核心检出 · 41/41</div></div>
-      <div class="stat"><div class="v good">0%</div><div class="l">误报 · 0/22</div></div>
+      <div class="stat"><div class="v good">4</div><div class="l">职能 Agent</div></div>
+      <div class="stat"><div class="v good">54</div><div class="l">测试全绿</div></div>
+      <div class="stat"><div class="v good">100%</div><div class="l">SentinelBench 核心</div></div>
       <div class="stat"><div class="v">0</div><div class="l">运行时依赖</div></div>
     </div>
-    <div class="proof">真 <b>mcp.ClientSession</b> 经 Sentinel 浏览投毒商品并付款，攻击者收款在真实协议上被熔断 · SentinelBench 映射 OWASP MCP Top 10，保留诚实的困难档 · 回执 HMAC 可验签、可测篡改</div>
+    <div class="proof">SentinelBench(71 用例, OWASP MCP Top 10)+ CommerceBench(10 场景)+ 真 MCP SDK 集成 · CI 常绿 · 在线站点 jiangmuran.github.io/sentinel</div>
   </div></section>
 
-  <!-- 9 COMPLEMENTARY -->
+  <!-- 10 CRITERIA -->
   <section class="slide"><div class="inner">
-    <div class="eyebrow"><span class="n">08</span> 与巨头互补，不竞争</div>
-    <h2>他们是路，我们是<span class="brand">安全气囊</span>。</h2>
-    <p class="wide big">我们不跟 Visa/万事达/谷歌拼支付轨道——我们<b>接入</b>他们所有的轨道，补上他们都缺的那道"运行时预防"闸。</p>
-    <div class="proof">consumes AP2 / Verifiable-Intent mandates · guards the decision-to-transact whatever rail settles it · a natural fit for <b>蚂蚁 / 支付风控</b></div>
-  </div></section>
-
-  <!-- 10 VISION -->
-  <section class="slide"><div class="inner">
-    <div class="eyebrow"><span class="n">09</span> 画饼 · 愿景</div>
-    <h2 class="brand" style="font-size:clamp(30px,5vw,56px)">给智能体动作的 TLS。</h2>
-    <p class="quote" style="max-width:26ch;margin-top:18px">当 agent 开始交易、委派、自主行动，每一个有后果的动作都需要一次实时的信任校验。</p>
-    <div class="proof">TAM = 未来每一笔自主智能体交易 · billions/day · 每一笔都要过这一道闸——这是智能体经济的断路器</div>
-  </div></section>
-
-  <!-- 11 CRITERIA -->
-  <section class="slide"><div class="inner">
-    <div class="eyebrow"><span class="n">10</span> 对照 GOAI 评审维度</div>
-    <h2>为什么它适合这个比赛。</h2>
+    <div class="eyebrow"><span class="n">09</span> 对照评分维度</div>
+    <h2>逐权重命中。</h2>
     <div class="cols">
-      <div class="card good"><div class="t" style="color:var(--safe)">技术创新性</div><p>运行时 mandate + provenance 执行——巨头结构上不占的空位</p></div>
-      <div class="card good"><div class="t" style="color:var(--safe)">开源贡献度</div><p>Apache-2.0、轨道无关、可插拔、OWASP 对齐的 SentinelBench</p></div>
-      <div class="card good"><div class="t" style="color:var(--safe)">真实场景价值</div><p>今天就会花钱的 agent 的资金安全；对口蚂蚁风控</p></div>
-      <div class="card good"><div class="t" style="color:var(--safe)">工程/长期</div><p>46 测试、零依赖、真协议验证；一个可长成品类的基座</p></div>
+      <div class="card good"><div class="t" style="color:var(--safe)">场景价值 25%</div><p>金融风控/理赔刚需;可迁移反欺诈、支付合规</p></div>
+      <div class="card good"><div class="t" style="color:var(--safe)">多 Agent 协同 25%</div><p>4 Agent 闭环,职责清晰,异常转人工</p></div>
+      <div class="card good"><div class="t" style="color:var(--safe)">Skill 工程 25%</div><p>4 个 Sentinel Skill,MCP 接入,可复用</p></div>
+      <div class="card good"><div class="t" style="color:var(--safe)">安全可审计 20% + 开源 5%</div><p><b>我们的绝对强项</b>:签名回执 + 审计日志 + provenance;Apache-2.0 + 双基准</p></div>
     </div>
+  </div></section>
+
+  <!-- 11 VISION -->
+  <section class="slide"><div class="inner">
+    <div class="eyebrow"><span class="n">10</span> 愿景</div>
+    <h2 class="brand" style="font-size:clamp(28px,4.6vw,52px)">让每个会花钱的 Agent 团队,<br>既自主,又可信。</h2>
+    <p class="lede wide big">当 agent 开始交易、放款、委派,企业需要的不只是"能协同的多 Agent",而是"每个高危动作都被运行时强制校验授权与来源"的多 Agent。GuardTeam 是这层信任基座的第一块能跑的拼图。</p>
   </div></section>
 
   <!-- 12 CLOSE -->
   <section class="slide"><div class="inner">
-    <div class="eyebrow">Sentinel · AI 智能体支付的运行时执行层</div>
-    <h1 style="font-size:clamp(28px,5vw,58px)">在钱转出去之前，<br>把错误的那一笔拦下。</h1>
-    <p class="lede big wide">开源 · Apache-2.0 · 已在真实 MCP 协议上跑通。</p>
-    <div class="badges"><span class="badge hot">python examples/commerce_demo.py</span><span class="badge">python -m benchmark.runner</span></div>
+    <div class="eyebrow">Sentinel GuardTeam · 支付风控多智能体自主闭环</div>
+    <h1 style="font-size:clamp(26px,4.6vw,54px)">在钱放出去之前,<br>把错误的那一笔拦下。</h1>
+    <p class="lede big wide">开源 · Apache-2.0 · 基于 AgentTeams · 54 测试全绿 · 现在就能跑。</p>
+    <div class="badges"><span class="badge hot">python examples/guardteam_demo.py</span><span class="badge">jiangmuran.github.io/sentinel</span></div>
   </div></section>
 
 </div>
@@ -211,7 +228,7 @@
 <div class="arrows"><button id="prev" aria-label="Previous">‹</button><button id="next" aria-label="Next">›</button></div>
 <div class="chrome">
   <div class="brandmark">
-    <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3Z" fill="none" stroke="var(--brand)" stroke-width="1.7" stroke-linejoin="round"/><path d="M8.5 12.2 11 14.7l5-5.5" stroke="var(--brand)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Sentinel
+    <svg class="glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3Z" fill="none" stroke="var(--brand)" stroke-width="1.7" stroke-linejoin="round"/><path d="M8.5 12.2 11 14.7l5-5.5" stroke="var(--brand)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Sentinel GuardTeam
   </div>
   <div class="dots" id="dots"></div>
   <div class="count" id="count"></div>
