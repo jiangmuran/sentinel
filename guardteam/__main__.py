@@ -101,6 +101,31 @@ def cmd_verify(args) -> int:
     return 0 if valid else 1
 
 
+def cmd_bench(args) -> int:
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+    from benchmark import runner as sb
+    from benchmark import commerce_scenarios as cb
+    sbr = sb.run()
+    cbr = cb.run()
+    if args.json:
+        _emit({"sentinelbench": sbr, "commercebench": cbr})
+    else:
+        c = sbr["corpus"]
+        print(f"SentinelBench  {c['total']} cases "
+              f"({c['malicious']} malicious / {c['benign']} benign)")
+        print(f"  core detection : {sbr['core_detection_rate']:6.1%}  "
+              f"({sbr['core_detected']}/{sbr['core_total']})")
+        print(f"  hard detection : {sbr['hard_detection_rate']:6.1%}  "
+              f"({sbr['hard_detected']}/{sbr['hard_total']})")
+        print(f"  false positives: {sbr['false_positive_rate']:6.1%}  "
+              f"({sbr['false_positives']}/{sbr['benign_total']})")
+        cb_pass = cbr["total"] - len(cbr["failures"])
+        print(f"CommerceBench  {cb_pass}/{cbr['total']} scenarios enforced")
+    # Fail (exit 1) on any core regression or CommerceBench miss — CI gate.
+    ok = not sbr["regressions"] and not cbr["failures"]
+    return 0 if ok else 1
+
+
 def cmd_serve_mcp(args) -> int:
     from .mcp_server import mcp
     mcp.run()
@@ -131,6 +156,10 @@ def build_parser() -> argparse.ArgumentParser:
     v.add_argument("file")
     v.add_argument("--secret", default=DEFAULT_SECRET)
     v.set_defaults(func=cmd_verify)
+
+    b = sub.add_parser("bench", help="run SentinelBench + CommerceBench scorecard")
+    b.add_argument("--json", action="store_true")
+    b.set_defaults(func=cmd_bench)
 
     m = sub.add_parser("serve-mcp", help="run the Sentinel Skills MCP server")
     m.set_defaults(func=cmd_serve_mcp)

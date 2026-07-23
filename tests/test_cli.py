@@ -57,6 +57,13 @@ class TestCLI(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertEqual(out["decision"], "blocked")
 
+    def test_bench_scorecard_no_regressions(self):
+        code, out = _run(["bench", "--json"])
+        self.assertEqual(code, 0)  # core clean + CommerceBench all enforced
+        self.assertEqual(out["sentinelbench"]["core_detection_rate"], 1.0)
+        self.assertEqual(out["sentinelbench"]["false_positive_rate"], 0.0)
+        self.assertEqual(out["commercebench"]["failures"], [])
+
 
 if __name__ == "__main__":
     unittest.main()
