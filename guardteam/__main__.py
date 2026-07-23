@@ -144,6 +144,19 @@ def cmd_audit(args) -> int:
     return 0 if result["ok"] else 1
 
 
+def cmd_report(args) -> int:
+    from .ledger import AuditLedger
+    from .report import render_html
+    ledger = AuditLedger.load(args.file, args.secret)
+    doc = render_html(ledger)
+    if args.out:
+        Path(args.out).write_text(doc, encoding="utf-8")
+        print(f"wrote {args.out} ({len(ledger.entries)} decisions)")
+    else:
+        print(doc)
+    return 0 if ledger.verify()["ok"] else 1
+
+
 def cmd_serve_mcp(args) -> int:
     from .mcp_server import mcp
     # stdio (default, CI-verified) for local/subprocess use; streamable-http/sse
@@ -189,6 +202,12 @@ def build_parser() -> argparse.ArgumentParser:
     au.add_argument("file")
     au.add_argument("--secret", default=DEFAULT_SECRET)
     au.set_defaults(func=cmd_audit)
+
+    rp = sub.add_parser("report", help="render an audit ledger to an HTML report")
+    rp.add_argument("file")
+    rp.add_argument("--out", help="write HTML here (default: stdout)")
+    rp.add_argument("--secret", default=DEFAULT_SECRET)
+    rp.set_defaults(func=cmd_report)
 
     m = sub.add_parser("serve-mcp", help="run the Sentinel Skills MCP server")
     m.add_argument("--transport", default="stdio",

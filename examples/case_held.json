@@ -1,0 +1,7 @@
+{
+  "case_id": "claim-C",
+  "signals": [
+    {"source": "core-ledger", "text": "理赔申请 #C: 金额 ¥2500, 材料齐全。", "trusted": true}
+  ],
+  "proposed_payout": {"to": "acct-MERCHANT-001", "amount": 2500}
+}

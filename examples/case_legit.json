@@ -1,0 +1,8 @@
+{
+  "case_id": "claim-B",
+  "signals": [
+    {"source": "core-ledger", "text": "理赔申请 #B: 金额 ¥1200, 材料齐全。", "trusted": true},
+    {"source": "kyc-service", "text": "受益人 acct-CLAIMANT-88 身份已核验。", "trusted": true}
+  ],
+  "proposed_payout": {"to": "acct-CLAIMANT-88", "amount": 1200}
+}

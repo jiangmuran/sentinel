@@ -80,5 +80,27 @@ class TestAuditLedger(unittest.TestCase):
         self.assertTrue(led.verify()["ok"])
 
 
+class TestReport(unittest.TestCase):
+    def test_report_renders_verdicts_and_integrity(self):
+        from guardteam.report import render_html
+        led = _ledger()
+        led.append({"case_id": "a", "decision": "approved", "amount": 10,
+                    "recipient": "acct-OK", "reasons": []})
+        led.append({"case_id": "b", "decision": "blocked", "amount": 99,
+                    "recipient": "acct-EVIL", "reasons": ["off allow-list"]})
+        doc = render_html(led)
+        self.assertIn("<!doctype html>", doc)
+        self.assertIn("完整性校验通过", doc)
+        self.assertIn("acct-EVIL", doc)
+        self.assertIn("off allow-list", doc)
+
+    def test_report_flags_tampered_ledger(self):
+        from guardteam.report import render_html
+        led = _ledger()
+        led.append({"case_id": "a", "decision": "blocked", "reasons": []})
+        led.entries[0]["record"]["decision"] = "approved"  # tamper
+        self.assertIn("完整性校验失败", render_html(led))
+
+
 if __name__ == "__main__":
     unittest.main()
