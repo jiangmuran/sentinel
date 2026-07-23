@@ -48,6 +48,12 @@ python examples/guardteam_demo.py   # watch the 4 agents; fraud blocked + escala
 
 🎮 **Live interactive console** (click a case, watch the agents block fraud): <https://jiangmuran.github.io/sentinel/guardteam.html>
 
+**LLM support (optional).** The analysis agents take a pluggable `Brain` — deterministic by
+default (runs anywhere) or LLM-driven: **`ClaudeBrain`** via the official `anthropic` SDK
+(`claude-opus-4-8`), or **`LLMBrain`** for any OpenAI-compatible endpoint (Qwen / DeepSeek /
+OpenAI / local, matching AgentTeams). Enforcement stays deterministic regardless — *LLM proposes,
+Sentinel disposes* (`pip install -e ".[llm]"`; `python examples/guardteam_llm_demo.py`).
+
 → Proposal + 初赛 作品简介: [`docs/GOAI_INFRA_PROPOSAL.md`](docs/GOAI_INFRA_PROPOSAL.md) ·
 Deck: [`web/pitch.html`](https://jiangmuran.github.io/sentinel/pitch.html) ·
 Code: [`guardteam/`](guardteam/)

@@ -24,6 +24,9 @@ dependencies = []
 # core library, demos, and benchmark have no third-party dependencies.
 [project.optional-dependencies]
 test = ["mcp>=1.2"]
+# Optional: drive the GuardTeam analysis agents with Claude (first-party SDK).
+# The OpenAI-compatible brain and the deterministic default need nothing extra.
+llm = ["anthropic>=0.40"]
 
 [project.urls]
 Homepage = "https://github.com/jiangmuran/sentinel"

@@ -94,5 +94,43 @@ class TestGuardTeam(unittest.TestCase):
             self.assertTrue(s.name and s.inputs and s.outputs and s.failure and s.reuse)
 
 
+class _FakeBlock:
+    type = "text"
+    text = '{"level":"high","reason":"suspicious recipient"}'
+
+
+class _FakeMessages:
+    def create(self, **kw):
+        return type("R", (), {"content": [_FakeBlock()]})()
+
+
+class TestClaudeBrain(unittest.TestCase):
+    def _brain(self):
+        from guardteam import ClaudeBrain
+        client = type("C", (), {"messages": _FakeMessages()})()
+        return ClaudeBrain(client=client)
+
+    def test_parses_claude_json(self):
+        b = self._brain()
+        self.assertEqual(b.decide("locator", {"x": 1})["level"], "high")
+
+    def test_unknown_role_returns_none(self):
+        self.assertIsNone(self._brain().decide("auditor", {}))
+
+    def test_degrades_without_sdk_or_creds(self):
+        # No injected client + no anthropic SDK/creds → None, never crash.
+        from guardteam import ClaudeBrain
+        b = ClaudeBrain()
+        if not b.configured:
+            self.assertIsNone(b.decide("locator", {"x": 1}))
+
+    def test_guardteam_runs_with_claude_brain(self):
+        team = GuardTeam(_team().mandate, SECRET, brain=self._brain())
+        final, _ = team.handle_case(
+            "cc", [{"source": "l", "text": "ok", "trusted": True}],
+            {"to": "acct-OK", "amount": 10})
+        self.assertIn(final["decision"], ("approved", "blocked"))
+
+
 if __name__ == "__main__":
     unittest.main()
