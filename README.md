@@ -44,6 +44,8 @@ fraudulent payment through.
 python examples/guardteam_demo.py   # watch the 4 agents; fraud blocked + escalated, legit approved
 ```
 
+🎮 **Live interactive console** (click a case, watch the agents block fraud): <https://jiangmuran.github.io/sentinel/guardteam.html>
+
 → Proposal + 初赛 作品简介: [`docs/GOAI_INFRA_PROPOSAL.md`](docs/GOAI_INFRA_PROPOSAL.md) ·
 Deck: [`web/pitch.html`](https://jiangmuran.github.io/sentinel/pitch.html) ·
 Code: [`guardteam/`](guardteam/)
